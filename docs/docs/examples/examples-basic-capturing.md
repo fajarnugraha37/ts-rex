@@ -1,6 +1,6 @@
 ---
 sidebar_position: 5
-title: Example: Basic Capturing
+title: Example - Basic Capturing
 description: A simple example of using .capture() to extract data from strings with full TypeScript type safety.
 ---
 

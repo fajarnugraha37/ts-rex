@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: Example: Global Matching & Iteration
+title: Example - Global Matching & Iteration
 description: Learn how to use the .global() flag in TS-Rex to iterate over all matches in a string safely and statelessly.
 ---
 

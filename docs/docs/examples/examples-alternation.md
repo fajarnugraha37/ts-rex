@@ -1,6 +1,6 @@
 ---
 sidebar_position: 3
-title: Example: Alternation with .or()
+title: Example - Alternation with .or()
 description: Explore how to use alternation in TS-Rex with the .or() method. Understand how the type system models mutual exclusivity with union types.
 ---
 
