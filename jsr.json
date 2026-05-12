@@ -1,5 +1,5 @@
 {
-  "name": "@fajar/rx-builder",
+  "name": "@fajar/ts-rex",
   "version": "0.1.0",
   "license": "MIT",
   "exports": "./src/index.ts",

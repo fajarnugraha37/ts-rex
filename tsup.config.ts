@@ -23,8 +23,8 @@ export default defineConfig([
       };
     },
     treeshake: false,
-    target: "es2022",
-    platform: "node",
+    target: "es2020",
+    platform: "neutral",
     cjsInterop: true,
     keepNames: true,
     skipNodeModulesBundle: false,

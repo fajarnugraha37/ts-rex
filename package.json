@@ -1,16 +1,16 @@
 {
-  "name": "@fajarnugraha37/rx-builder",
+  "name": "@fajarnugraha37/ts-rex",
   "version": "0.0.1",
   "description": "A TypeScript library for building Regex patterns.",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
   },
@@ -33,7 +33,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fajarnugraha37/rx-builder.git"
+    "url": "git+https://github.com/fajarnugraha37/ts-rex.git"
   },
   "license": "MIT",
   "scripts": {
@@ -49,7 +49,6 @@
     "@types/bun": "latest",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
-    "expect": "^30.4.1",
     "expect-type": "^1.3.0",
     "glob": "^13.0.6",
     "tsup": "^8.5.1",

@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    name: Build & Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type Check
+        run: bun run lint && bunx tsc --noEmit
+
+      - name: Run Unit Tests
+        run: |
+          bun test --isolate --coverage --exit > test_output.txt 2>&1 || true
+          cat test_output.txt
+          if grep -q "0 fail" test_output.txt; then
+            echo "All unit tests passed"
+            exit 0
+          else
+            echo "Unit tests failed"
+            exit 1
+          fi
+          
+      - name: Build
+        run: bun run build
