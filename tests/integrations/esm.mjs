@@ -5,6 +5,7 @@ capturing();
 globalIteration();
 matchIndices();
 alternationAndOptionality();
+urlParser();
 
 function simple() {
   console.log("--- Simple Example ---");
@@ -89,4 +90,50 @@ function alternationAndOptionality() {
     // TypeScript enforces that either 'a' is a string and 'b' is undefined, or vice versa.
     console.log(result.a);
   }
+}
+
+function urlParser() {
+  console.log("--- URL Parser Example ---");
+  const protocol = rx().capture('protocol', rx().literal('http').optional(rx().literal('s')));
+
+  const alphanumeric = rx()
+    .range('a', 'z')
+    .or(rx().range('A', 'Z'))
+    .or(rx().range('0', '9'));
+
+  const passwordChars = alphanumeric.or(rx().anyOf('!@#$%^&*'));
+
+  const auth = rx().capture(
+    'auth',
+    rx()
+      .capture('username', rx().oneOrMore(rx().wordChar()))
+      .literal(':')
+      .capture('password', rx().oneOrMore(passwordChars))
+      .literal('@')
+  );
+
+  const domainChars = rx().range('a', 'z').or(rx().range('0', '9')).or(rx().anyOf('.-'));
+
+  const urlParser = rx()
+    .startOfInput()
+    .group(protocol)
+    .literal('://')
+    .optional(auth)
+    .capture('domain', rx().oneOrMore(domainChars))
+    .optional(
+      rx()
+        .literal(':')
+        .capture('port', rx().oneOrMore(rx().digit()))
+    )
+    .optional(
+      rx()
+        .literal('/')
+        .capture('path', rx().zeroOrMore(rx().notWhitespace()))
+    )
+    .endOfInput()
+    .compile();
+
+  console.log(urlParser.pattern);
+  const parsed = urlParser.exec('https://admin:secret123@api.example.com:8080/v1/users');
+  console.log(parsed);
 }

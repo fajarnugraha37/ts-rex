@@ -1,0 +1,456 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="./"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>TS-Rex Documentation</title><meta name="description" content="Documentation for TS-Rex Documentation"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script defer src="assets/main.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script><link rel="stylesheet" href="assets/typedoc-github-style.css"/></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="index.html" class="title">TS-Rex Documentation</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>TS-Rex Documentation</h1></div><div class="tsd-panel tsd-typography"><h1 id="ts-rex" class="tsd-anchor-link">TS-Rex<a href="#ts-rex" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<h1 align="center">
+  <a href="https://github.com/fajarnugraha37/ts-rex">
+    <picture>
+      <img height="300" alt="TS-Rex Logo" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/docs/logo.png">
+    </picture>
+  </a>
+</h1>
+<p align="center">
+  <em><b>TS-Rex</b> is a zero-dependency, meta-programming utility designed to eliminate the brittleness of standard JavaScript RegExp matching. Inspired by Drizzle ORM, it enables developers to construct complex regular expressions through an intuitive chainable API while statically inferring the exact shape of named capturing groups and execution outputs at compile time.</em>
+</p>
+<h2 id="tech-stack" class="tsd-anchor-link">Tech Stack<a href="#tech-stack" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ul>
+<li><strong>TypeScript</strong>: The core logic and advanced generic type system.</li>
+<li><strong>Bun</strong>: Used for dependency management, test running, and linting.</li>
+<li><strong>tsup</strong>: Bundler for UMD, CJS, ESM, and type declarations.</li>
+<li><strong>expect-type</strong>: Static type assertion utility for unit testing.</li>
+</ul>
+<h2 id="architecture" class="tsd-anchor-link">Architecture<a href="#architecture" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>TS-Rex is built upon four architectural pillars:</p>
+<ol>
+<li><strong>AST Generation</strong>: Instead of manipulating strings that can easily become malformed, every chained method appends an AST node to an internal array.</li>
+<li><strong>Immutability</strong>: Each method call creates and returns a completely new <code>RegexBuilder</code> instance. This allows you to safely branch regex definitions (e.g., saving a base pattern into a variable and extending it multiple times) without unintended side effects.</li>
+<li><strong>Phantom Type State</strong>: As you chain methods like <code>.capture()</code>, <code>.optional()</code>, or <code>.or()</code>, TypeScript infers and records the resulting group names and optionality within the generic state. This happens entirely during compilation, imposing <strong>zero</strong> runtime memory overhead.</li>
+<li><strong>Runtime Compilation</strong>: Calling <code>.compile()</code> collapses the AST into a native JavaScript <code>RegExp</code> instance and binds the execution context flags, returning a strict type-safe execution wrapper.</li>
+</ol>
+<h2 id="features" class="tsd-anchor-link">Features<a href="#features" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ul>
+<li><strong>Fluent API</strong>: Chain methods to build regex patterns programmatically.</li>
+<li><strong>Static Type Inference</strong>: Named capturing groups are automatically inferred as strongly-typed objects at compile time.</li>
+<li><strong>Stateless Execution</strong>: The <code>.exec()</code> wrapper instantiates fresh <code>RegExp</code> objects to prevent state mutation bugs associated with the <code>g</code> and <code>y</code> flags.</li>
+<li><strong>Deep Optionality</strong>: Quantifiers (<code>.optional()</code>, <code>.zeroOrMore()</code>) and alternations (<code>.or()</code>) correctly map captured properties to <code>Partial</code> or union types.</li>
+<li><strong>Zero Dependencies</strong>: Built entirely on standard TypeScript and native <code>RegExp</code>.</li>
+</ul>
+<h2 id="core-entities" class="tsd-anchor-link">Core Entities<a href="#core-entities" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>To effectively use this library, you should understand these core entities:</p>
+<ul>
+<li><code>rx()</code>: The factory function that initializes a fresh, empty builder.</li>
+<li><code>RegexBuilder</code>: The immutable builder class. Exposes dozens of chainable, strictly-typed methods (<code>.literal()</code>, <code>.digit()</code>, <code>.capture()</code>, etc.).</li>
+<li><code>CompiledRegex</code>: The object returned by <code>.compile()</code>. It contains:
+<ul>
+<li><code>pattern</code>: The raw string representation of the regex.</li>
+<li><code>native</code>: The native JavaScript <code>RegExp</code> instance.</li>
+<li><code>test(string)</code>: A fast, stateless boolean check (<code>true</code> / <code>false</code>).</li>
+<li><code>exec(string)</code>: The type-safe extractor method.</li>
+</ul>
+</li>
+<li><code>MatchResult</code>: The discriminated union returned by <code>.exec()</code>.
+<ul>
+<li>On failure: <code>{ isMatch: false, match: null }</code></li>
+<li>On success: <code>{ isMatch: true, match: string, ...[Your Captures] }</code>. (If the <code>.global()</code> flag is set, this becomes an <code>IterableIterator</code> of successful matches).</li>
+</ul>
+</li>
+</ul>
+<h2 id="philosophy-auto-escaping-safety-first" class="tsd-anchor-link">Philosophy: Auto-Escaping &amp; Safety First<a href="#philosophy-auto-escaping-safety-first" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>To protect from malformed regular expressions, <code>ts-rex</code> heavily enforces <strong>Automatic Escaping</strong>.</p>
+<p>If you use <code>.literal('http://')</code> or <code>.anyOf('a-z')</code>, the library will automatically escape all special regex characters. For example, <code>rx().anyOf('a-z')</code> complies to <code>[a\-z]</code>, meaning it searches for the literal characters &quot;a&quot;, &quot;-&quot;, and &quot;z&quot;, <strong>not</strong> a range.</p>
+<div class="tsd-alert tsd-alert-warning"><div class="tsd-alert-title"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="assets/icons.svg#icon-alertWarning"></use></svg><span>Warning</span></div><p><br>
+Do not attempt to inject raw regex strings into builder methods. To build complex character classes (like <code>[a-zA-Z0-9.-]</code>), you must compose them using the type-safe methods:</p>
+<pre><code class="typescript"><span class="hl-0">// Correct way to compose ranges</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">myClass</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;a&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;z&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">  .</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;A&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;Z&#39;</span><span class="hl-2">))</span><br/><span class="hl-2">  .</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;0&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;9&#39;</span><span class="hl-2">))</span><br/><span class="hl-2">  .</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">anyOf</span><span class="hl-2">(</span><span class="hl-5">&#39;.-&#39;</span><span class="hl-2">)); </span><br/><span class="hl-2">  </span><span class="hl-0">// Compiles to: (?:(?:(?:[a-z]|[A-Z])|[0-9])|[.\-])</span>
+</code><button type="button">Copy</button></pre>
+
+<p>This verbose compilation behaves 100% identically to <code>[a-zA-Z0-9.-]</code> in regex engines but guarantees syntactic safety.</p>
+</div>
+<h2 id="getting-started" class="tsd-anchor-link">Getting Started<a href="#getting-started" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="installation" class="tsd-anchor-link">Installation<a href="#installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="bash"><span class="hl-0"># via bun</span><br/><span class="hl-4">bun</span><span class="hl-2"> </span><span class="hl-5">add</span><span class="hl-2"> </span><span class="hl-5">@fajarnugraha37/ts-rex</span><br/><br/><span class="hl-0"># via npm</span><br/><span class="hl-4">npm</span><span class="hl-2"> </span><span class="hl-5">install</span><span class="hl-2"> </span><span class="hl-5">@fajarnugraha37/ts-rex</span><br/><br/><span class="hl-0"># via pnpm</span><br/><span class="hl-4">pnpm</span><span class="hl-2"> </span><span class="hl-5">add</span><span class="hl-2"> </span><span class="hl-5">@fajarnugraha37/ts-rex</span>
+</code><button type="button">Copy</button></pre>
+
+<div class="tsd-alert tsd-alert-note"><div class="tsd-alert-title"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><use href="assets/icons.svg#icon-alertNote"></use></svg><span>Note</span></div><p><br>
+This library requires TypeScript version 5.0 or higher for full advanced type inference support.</p>
+</div>
+<h2 id="key-features-usage" class="tsd-anchor-link">Key Features &amp; Usage<a href="#key-features-usage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="basic-capturing" class="tsd-anchor-link">Basic Capturing<a href="#basic-capturing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Named capture groups automatically populate the output signature of <code>.exec()</code>.</p>
+<pre><code class="typescript"><span class="hl-6">import</span><span class="hl-2"> { </span><span class="hl-7">rx</span><span class="hl-2"> } </span><span class="hl-6">from</span><span class="hl-2"> </span><span class="hl-5">&#39;@fajarnugraha37/ts-rex&#39;</span><span class="hl-2">;</span><br/><br/><span class="hl-0">// Build a pattern</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">pattern</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">startOfInput</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;firstName&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">wordChar</span><span class="hl-2">()))</span><br/><span class="hl-2">  .</span><span class="hl-4">whitespace</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;lastName&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">wordChar</span><span class="hl-2">()))</span><br/><span class="hl-2">  .</span><span class="hl-4">endOfInput</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">compile</span><span class="hl-2">();</span><br/><br/><span class="hl-0">// Execute the pattern</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">result</span><span class="hl-2"> = </span><span class="hl-7">pattern</span><span class="hl-2">.</span><span class="hl-4">exec</span><span class="hl-2">(</span><span class="hl-5">&#39;John Doe&#39;</span><span class="hl-2">);</span><br/><br/><span class="hl-6">if</span><span class="hl-2"> (</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">isMatch</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-0">// Types are fully inferred based on the captures defined above</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">firstName</span><span class="hl-2">); </span><span class="hl-0">// &quot;John&quot;</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">lastName</span><span class="hl-2">);  </span><span class="hl-0">// &quot;Doe&quot;</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">match</span><span class="hl-2">);     </span><span class="hl-0">// &quot;John Doe&quot; (The full match)</span><br/><span class="hl-2">}</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="global-iteration" class="tsd-anchor-link">Global Iteration<a href="#global-iteration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Flags dynamically modify the return type of <code>.exec()</code>. Using the <code>.global()</code> flag changes the result from a single object to an <code>IterableIterator</code>. Execution is fully stateless to avoid native <code>lastIndex</code> bugs.</p>
+<pre><code class="typescript"><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">pattern</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;num&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">digit</span><span class="hl-2">()))</span><br/><span class="hl-2">  .</span><span class="hl-4">global</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">compile</span><span class="hl-2">();</span><br/><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">results</span><span class="hl-2"> = </span><span class="hl-7">pattern</span><span class="hl-2">.</span><span class="hl-4">exec</span><span class="hl-2">(</span><span class="hl-5">&#39;I have 3 apples and 42 bananas&#39;</span><span class="hl-2">);</span><br/><br/><span class="hl-6">for</span><span class="hl-2"> (</span><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">result</span><span class="hl-2"> </span><span class="hl-1">of</span><span class="hl-2"> </span><span class="hl-7">results</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">num</span><span class="hl-2">); </span><span class="hl-0">// &quot;3&quot;, &quot;42&quot;</span><br/><span class="hl-2">}</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="match-indices" class="tsd-anchor-link">Match Indices<a href="#match-indices" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Using the <code>.withIndices()</code> flag (ECMAScript <code>d</code> flag) injects an <code>indices</code> property containing <code>[start, end]</code> tuples for the full match and every captured group.</p>
+<pre><code class="typescript"><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">pattern</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;val&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">wordChar</span><span class="hl-2">())</span><br/><span class="hl-2">  .</span><span class="hl-4">withIndices</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">compile</span><span class="hl-2">();</span><br/><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">result</span><span class="hl-2"> = </span><span class="hl-7">pattern</span><span class="hl-2">.</span><span class="hl-4">exec</span><span class="hl-2">(</span><span class="hl-5">&#39;a&#39;</span><span class="hl-2">);</span><br/><br/><span class="hl-6">if</span><span class="hl-2"> (</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">isMatch</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">indices</span><span class="hl-2">.</span><span class="hl-7">match</span><span class="hl-2">); </span><span class="hl-0">// [0, 1]</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">indices</span><span class="hl-2">.</span><span class="hl-7">val</span><span class="hl-2">);   </span><span class="hl-0">// [0, 1]</span><br/><span class="hl-2">}</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="alternation-and-optionality" class="tsd-anchor-link">Alternation and Optionality<a href="#alternation-and-optionality" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Using <code>.or()</code> creates a union type, ensuring mutually exclusive access to capturing groups.</p>
+<pre><code class="typescript"><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">pattern</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;a&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;A&#39;</span><span class="hl-2">))</span><br/><span class="hl-2">  .</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;b&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;B&#39;</span><span class="hl-2">)))</span><br/><span class="hl-2">  .</span><span class="hl-4">compile</span><span class="hl-2">();</span><br/><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">result</span><span class="hl-2"> = </span><span class="hl-7">pattern</span><span class="hl-2">.</span><span class="hl-4">exec</span><span class="hl-2">(</span><span class="hl-5">&#39;A&#39;</span><span class="hl-2">);</span><br/><br/><span class="hl-6">if</span><span class="hl-2"> (</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">isMatch</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-0">// TypeScript enforces that either &#39;a&#39; is a string and &#39;b&#39; is undefined, or vice versa.</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">result</span><span class="hl-2">.</span><span class="hl-7">a</span><span class="hl-2">);</span><br/><span class="hl-2">}</span>
+</code><button type="button">Copy</button></pre>
+
+<h2 id="supported-regex-operations-tokens" class="tsd-anchor-link">Supported Regex Operations &amp; Tokens<a href="#supported-regex-operations-tokens" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p><code>ts-rex</code> supports almost the entire ECMAScript (ES2024) Regular Expression syntax.</p>
+<h3 id="assertions-boundaries" class="tsd-anchor-link">Assertions &amp; Boundaries<a href="#assertions-boundaries" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Regex</th>
+<th style="text-align:left">API Method</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>^</code></td>
+<td style="text-align:left"><code>.startOfInput()</code></td>
+<td style="text-align:left">Matches the beginning of the input.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>$</code></td>
+<td style="text-align:left"><code>.endOfInput()</code></td>
+<td style="text-align:left">Matches the end of the input.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\b</code></td>
+<td style="text-align:left"><code>.wordBoundary()</code></td>
+<td style="text-align:left">Matches a word boundary.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\B</code></td>
+<td style="text-align:left"><code>.nonWordBoundary()</code></td>
+<td style="text-align:left">Matches a non-word boundary.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(?=y)</code></td>
+<td style="text-align:left"><code>.lookahead(builder)</code></td>
+<td style="text-align:left">Matches only if followed by the pattern.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(?!y)</code></td>
+<td style="text-align:left"><code>.negativeLookahead(builder)</code></td>
+<td style="text-align:left">Matches only if NOT followed by the pattern.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(?&lt;=y)</code></td>
+<td style="text-align:left"><code>.lookbehind(builder)</code></td>
+<td style="text-align:left">Matches only if preceded by the pattern.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(?&lt;!y)</code></td>
+<td style="text-align:left"><code>.negativeLookbehind(builder)</code></td>
+<td style="text-align:left">Matches only if NOT preceded by the pattern.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="character-classes-escapes" class="tsd-anchor-link">Character Classes &amp; Escapes<a href="#character-classes-escapes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Regex</th>
+<th style="text-align:left">API Method</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>.</code></td>
+<td style="text-align:left"><code>.anyChar()</code></td>
+<td style="text-align:left">Matches any single character.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\d</code></td>
+<td style="text-align:left"><code>.digit()</code></td>
+<td style="text-align:left">Matches any digit (0-9).</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\D</code></td>
+<td style="text-align:left"><code>.notDigit()</code></td>
+<td style="text-align:left">Matches any character that is not a digit.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\w</code></td>
+<td style="text-align:left"><code>.wordChar()</code></td>
+<td style="text-align:left">Matches any alphanumeric character.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\W</code></td>
+<td style="text-align:left"><code>.notWordChar()</code></td>
+<td style="text-align:left">Matches any non-word character.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\s</code></td>
+<td style="text-align:left"><code>.whitespace()</code></td>
+<td style="text-align:left">Matches a single white space character.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\S</code></td>
+<td style="text-align:left"><code>.notWhitespace()</code></td>
+<td style="text-align:left">Matches a single non-white space character.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[abc]</code></td>
+<td style="text-align:left"><code>.anyOf('abc')</code></td>
+<td style="text-align:left">Matches any enclosed character (auto-escapes internals).</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[^abc]</code></td>
+<td style="text-align:left"><code>.noneOf('abc')</code></td>
+<td style="text-align:left">Matches anything not enclosed.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>[a-z]</code></td>
+<td style="text-align:left"><code>.range('a', 'z')</code></td>
+<td style="text-align:left">Matches a character in the specified range.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\xNN</code></td>
+<td style="text-align:left"><code>.hex('NN')</code></td>
+<td style="text-align:left">Matches a character by its 2-digit hex code.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\uNNNN</code></td>
+<td style="text-align:left"><code>.unicodeChar('NNNN')</code></td>
+<td style="text-align:left">Matches a character by its 4-digit Unicode hex value.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\u{N}</code></td>
+<td style="text-align:left"><code>.unicodeCodePoint('NNNN')</code></td>
+<td style="text-align:left">Matches a Unicode code point.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\p{P}</code></td>
+<td style="text-align:left"><code>.unicodeProperty('...')</code></td>
+<td style="text-align:left">Matches a character based on its Unicode category.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\n</code>, <code>\t</code></td>
+<td style="text-align:left"><code>.newline()</code>, <code>.tab()</code>, etc</td>
+<td style="text-align:left">Named control characters.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="quantifiers" class="tsd-anchor-link">Quantifiers<a href="#quantifiers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Regex</th>
+<th style="text-align:left">API Method</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>*</code></td>
+<td style="text-align:left"><code>.zeroOrMore(builder?)</code></td>
+<td style="text-align:left">Matches 0 or more times. Maps nested captures to <code>Partial</code>.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>+</code></td>
+<td style="text-align:left"><code>.oneOrMore(builder?)</code></td>
+<td style="text-align:left">Matches 1 or more times.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>?</code></td>
+<td style="text-align:left"><code>.optional(builder?)</code></td>
+<td style="text-align:left">Matches 0 or 1 times. Maps nested captures to <code>Partial</code>.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>{n}</code></td>
+<td style="text-align:left"><code>.times(n, builder?)</code></td>
+<td style="text-align:left">Matches exactly &quot;n&quot; occurrences.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>{n,}</code></td>
+<td style="text-align:left"><code>.atLeast(n, builder?)</code></td>
+<td style="text-align:left">Matches at least &quot;n&quot; occurrences.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>{n,m}</code></td>
+<td style="text-align:left"><code>.between(n, m, builder?)</code></td>
+<td style="text-align:left">Matches between &quot;n&quot; and &quot;m&quot; occurrences.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>*?</code></td>
+<td style="text-align:left"><code>.lazy()</code></td>
+<td style="text-align:left">Appended to quantifiers to make them non-greedy.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="groups-logic" class="tsd-anchor-link">Groups &amp; Logic<a href="#groups-logic" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Regex</th>
+<th style="text-align:left">API Method</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>(?:x)</code></td>
+<td style="text-align:left"><code>.group(builder)</code></td>
+<td style="text-align:left">Non-capturing group.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>(?&lt;N&gt;x)</code></td>
+<td style="text-align:left"><code>.capture('N', builder)</code></td>
+<td style="text-align:left">Named capturing group. Extracts to the TS output object.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>\k&lt;N&gt;</code></td>
+<td style="text-align:left"><code>.matchPrevious('N')</code></td>
+<td style="text-align:left">Matches exact text captured previously. Statically checked.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>x|y</code></td>
+<td style="text-align:left"><code>.or(builder)</code></td>
+<td style="text-align:left">Matches either branch. Resolves to a TS Union type.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="flags" class="tsd-anchor-link">Flags<a href="#flags" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Regex</th>
+<th style="text-align:left">API Method</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>g</code></td>
+<td style="text-align:left"><code>.global()</code></td>
+<td style="text-align:left">Global iteration. Changes <code>.exec()</code> return type to <code>IterableIterator</code>.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>i</code></td>
+<td style="text-align:left"><code>.ignoreCase()</code></td>
+<td style="text-align:left">Case-insensitive match.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>m</code></td>
+<td style="text-align:left"><code>.multiline()</code></td>
+<td style="text-align:left">Modifies <code>^</code> and <code>$</code>.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>s</code></td>
+<td style="text-align:left"><code>.dotAll()</code></td>
+<td style="text-align:left">Allows <code>.</code> to match newlines.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>d</code></td>
+<td style="text-align:left"><code>.withIndices()</code></td>
+<td style="text-align:left">Appends <code>.indices</code> tuple objects into the <code>.exec()</code> return type.</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>v</code>, <code>y</code>, <code>u</code></td>
+<td style="text-align:left"><code>.unicodeSets()</code>, <code>.sticky()</code>, <code>.unicode()</code></td>
+<td style="text-align:left">Other modern ES context flags.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="advanced-example-url-parser" class="tsd-anchor-link">Advanced Example: URL Parser<a href="#advanced-example-url-parser" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>This example demonstrates how nested captures, alternations, deep optionality, and character classes seamlessly merge into a strictly typed result object. Notice how we compose small regex builders into larger ones.</p>
+<pre><code class="typescript"><span class="hl-6">import</span><span class="hl-2"> { </span><span class="hl-7">rx</span><span class="hl-2"> } </span><span class="hl-6">from</span><span class="hl-2"> </span><span class="hl-5">&#39;@fajarnugraha37/ts-rex&#39;</span><span class="hl-2">;</span><br/><br/><span class="hl-0">// Matches &#39;http&#39; or &#39;https&#39;</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">protocol</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;protocol&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;http&#39;</span><span class="hl-2">).</span><span class="hl-4">optional</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;s&#39;</span><span class="hl-2">)));</span><br/><br/><span class="hl-0">// Combine ranges and specific characters safely</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">alphanumeric</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;a&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;z&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">  .</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;A&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;Z&#39;</span><span class="hl-2">))</span><br/><span class="hl-2">  .</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;0&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;9&#39;</span><span class="hl-2">));</span><br/><br/><span class="hl-0">// Password allows alphanumeric and special characters</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">passwordChars</span><span class="hl-2"> = </span><span class="hl-7">alphanumeric</span><span class="hl-2">.</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">anyOf</span><span class="hl-2">(</span><span class="hl-5">&#39;!@#$%^&amp;*&#39;</span><span class="hl-2">));</span><br/><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">auth</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">capture</span><span class="hl-2">(</span><br/><span class="hl-2">  </span><span class="hl-5">&#39;auth&#39;</span><span class="hl-2">,</span><br/><span class="hl-2">  </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">    .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;username&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">wordChar</span><span class="hl-2">()))</span><br/><span class="hl-2">    .</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;:&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">    .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;password&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-7">passwordChars</span><span class="hl-2">))</span><br/><span class="hl-2">    .</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;@&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">);</span><br/><br/><span class="hl-0">// Domain allows lowercase letters, numbers, dot, and hyphen</span><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">domainChars</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;a&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;z&#39;</span><span class="hl-2">).</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">range</span><span class="hl-2">(</span><span class="hl-5">&#39;0&#39;</span><span class="hl-2">, </span><span class="hl-5">&#39;9&#39;</span><span class="hl-2">)).</span><span class="hl-4">or</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">anyOf</span><span class="hl-2">(</span><span class="hl-5">&#39;.-&#39;</span><span class="hl-2">));</span><br/><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">urlParser</span><span class="hl-2"> = </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">startOfInput</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">group</span><span class="hl-2">(</span><span class="hl-7">protocol</span><span class="hl-2">)</span><br/><span class="hl-2">  .</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;://&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">  .</span><span class="hl-4">optional</span><span class="hl-2">(</span><span class="hl-7">auth</span><span class="hl-2">) </span><span class="hl-0">// Automatically makes auth, username, and password types Partial</span><br/><span class="hl-2">  .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;domain&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-7">domainChars</span><span class="hl-2">))</span><br/><span class="hl-2">  .</span><span class="hl-4">optional</span><span class="hl-2">(</span><br/><span class="hl-2">    </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">      .</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;:&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">      .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;port&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">oneOrMore</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">digit</span><span class="hl-2">()))</span><br/><span class="hl-2">  )</span><br/><span class="hl-2">  .</span><span class="hl-4">optional</span><span class="hl-2">(</span><br/><span class="hl-2">    </span><span class="hl-4">rx</span><span class="hl-2">()</span><br/><span class="hl-2">      .</span><span class="hl-4">literal</span><span class="hl-2">(</span><span class="hl-5">&#39;/&#39;</span><span class="hl-2">)</span><br/><span class="hl-2">      .</span><span class="hl-4">capture</span><span class="hl-2">(</span><span class="hl-5">&#39;path&#39;</span><span class="hl-2">, </span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">zeroOrMore</span><span class="hl-2">(</span><span class="hl-4">rx</span><span class="hl-2">().</span><span class="hl-4">notWhitespace</span><span class="hl-2">()))</span><br/><span class="hl-2">  )</span><br/><span class="hl-2">  .</span><span class="hl-4">endOfInput</span><span class="hl-2">()</span><br/><span class="hl-2">  .</span><span class="hl-4">compile</span><span class="hl-2">();</span><br/><br/><span class="hl-1">const</span><span class="hl-2"> </span><span class="hl-3">parsed</span><span class="hl-2"> = </span><span class="hl-7">urlParser</span><span class="hl-2">.</span><span class="hl-4">exec</span><span class="hl-2">(</span><span class="hl-5">&#39;https://admin:secret123@api.example.com:8080/v1/users&#39;</span><span class="hl-2">);</span><br/><br/><span class="hl-6">if</span><span class="hl-2"> (</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">isMatch</span><span class="hl-2">) {</span><br/><span class="hl-2">  </span><span class="hl-0">// Types are fully mapped based on `.optional()` wrappers!</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">protocol</span><span class="hl-2">); </span><span class="hl-0">// &quot;https&quot; (Type: string)</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">domain</span><span class="hl-2">);   </span><span class="hl-0">// &quot;api.example.com&quot; (Type: string)</span><br/><span class="hl-2">  </span><br/><span class="hl-2">  </span><span class="hl-0">// Auth details are typed as string | undefined because of `.optional(auth)`</span><br/><span class="hl-2">  </span><span class="hl-6">if</span><span class="hl-2"> (</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">auth</span><span class="hl-2">) {</span><br/><span class="hl-2">    </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">username</span><span class="hl-2">); </span><span class="hl-0">// &quot;admin&quot;</span><br/><span class="hl-2">    </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">password</span><span class="hl-2">); </span><span class="hl-0">// &quot;secret123&quot;</span><br/><span class="hl-2">  }</span><br/><span class="hl-2">  </span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">port</span><span class="hl-2">); </span><span class="hl-0">// &quot;8080&quot; (Type: string | undefined)</span><br/><span class="hl-2">  </span><span class="hl-7">console</span><span class="hl-2">.</span><span class="hl-4">log</span><span class="hl-2">(</span><span class="hl-7">parsed</span><span class="hl-2">.</span><span class="hl-7">path</span><span class="hl-2">); </span><span class="hl-0">// &quot;v1/users&quot; (Type: string | undefined)</span><br/><span class="hl-2">}</span>
+</code><button type="button">Copy</button></pre>
+
+<h2 id="structure" class="tsd-anchor-link">Structure<a href="#structure" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The project relies on declaration merging across multiple files to circumvent the 300 LOC limit while maintaining a fluent API on a single class.</p>
+<ul>
+<li><code>/src/core/builder.ts</code>: Contains the foundational AST chunk engine, <code>RegexBuilder</code> class, compilation logic, and the centralized interface holding the generic signatures.</li>
+<li><code>/src/syntax/*.ts</code>: Modular implementation files attaching prototype methods (e.g., <code>alternation.ts</code>, <code>boundaries.ts</code>, <code>quantifiers.ts</code>).</li>
+<li><code>/src/index.ts</code>: The main entry point.</li>
+<li><code>/tests/*.test.ts</code>: Categorized behavioral and static type tests.</li>
+</ul>
+<h2 id="development-workflow" class="tsd-anchor-link">Development Workflow<a href="#development-workflow" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ol>
+<li>Use <code>bun run test</code> for running the isolated test suite.</li>
+<li>Use <code>bun run lint</code> to enforce formatting and style.</li>
+<li>Use <code>bun run build</code> to output common module formats into the <code>dist/</code> directory using <code>tsup</code>.</li>
+</ol>
+<h2 id="testing" class="tsd-anchor-link">Testing<a href="#testing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Module</th>
+<th style="text-align:center">% Funcs</th>
+<th style="text-align:center">% Lines</th>
+<th style="text-align:center">Uncovered Line #s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>src/core/builder.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/index.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/alternation.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/boundaries.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/character-classes.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/flags.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/groups.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/lookarounds.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/syntax/quantifiers.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">97.33</td>
+<td style="text-align:center">134 (Lazy quantifier verification hook)</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>src/utils/escape.ts</code></td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center">100.00</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>All files</strong></td>
+<td style="text-align:center"><strong>100.00</strong></td>
+<td style="text-align:center"><strong>99.87</strong></td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+<h2 id="license" class="tsd-anchor-link">License<a href="#license" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>MIT</p>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#ts-rex"><span>TS-<wbr/>Rex</span></a><ul><li><a href="#tech-stack"><span>Tech <wbr/>Stack</span></a></li><li><a href="#architecture"><span>Architecture</span></a></li><li><a href="#features"><span>Features</span></a></li><li><a href="#core-entities"><span>Core <wbr/>Entities</span></a></li><li><a href="#philosophy-auto-escaping-safety-first"><span>Philosophy: <wbr/>Auto-<wbr/>Escaping &amp; <wbr/>Safety <wbr/>First</span></a></li><li><a href="#getting-started"><span>Getting <wbr/>Started</span></a></li><li><ul><li><a href="#installation"><span>Installation</span></a></li></ul></li><li><a href="#key-features-usage"><span>Key <wbr/>Features &amp; <wbr/>Usage</span></a></li><li><ul><li><a href="#basic-capturing"><span>Basic <wbr/>Capturing</span></a></li><li><a href="#global-iteration"><span>Global <wbr/>Iteration</span></a></li><li><a href="#match-indices"><span>Match <wbr/>Indices</span></a></li><li><a href="#alternation-and-optionality"><span>Alternation and <wbr/>Optionality</span></a></li></ul></li><li><a href="#supported-regex-operations-tokens"><span>Supported <wbr/>Regex <wbr/>Operations &amp; <wbr/>Tokens</span></a></li><li><ul><li><a href="#assertions-boundaries"><span>Assertions &amp; <wbr/>Boundaries</span></a></li><li><a href="#character-classes-escapes"><span>Character <wbr/>Classes &amp; <wbr/>Escapes</span></a></li><li><a href="#quantifiers"><span>Quantifiers</span></a></li><li><a href="#groups-logic"><span>Groups &amp; <wbr/>Logic</span></a></li><li><a href="#flags"><span>Flags</span></a></li></ul></li><li><a href="#advanced-example-url-parser"><span>Advanced <wbr/>Example: <wbr/>URL <wbr/>Parser</span></a></li><li><a href="#structure"><span>Structure</span></a></li><li><a href="#development-workflow"><span>Development <wbr/>Workflow</span></a></li><li><a href="#testing"><span>Testing</span></a></li><li><a href="#license"><span>License</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html">TS-Rex Documentation</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a> with <a href="https://github.com/JulianWowra/typedoc-github-theme" target="_blank">typedoc-github-theme</a></p></footer><div class="overlay"></div></body></html>

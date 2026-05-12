@@ -3,15 +3,30 @@
 <h1 align="center">
   <a href="https://github.com/fajarnugraha37/ts-rex">
     <picture>
-      <img height="500" alt="Drizzle Castor" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/assets/logo.png">
+      <img height="300" alt="TS-Rex Logo" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/docs/logo.png">
     </picture>
   </a>
 </h1>
+
 <p align="center">
-    <em>A TypeScript library for constructing regular expressions using a fluent builder API. It provides compile-time type safety for capturing groups and execution contexts without requiring code generation.</em>
+  <em><b>TS-Rex</b> is a zero-dependency, meta-programming utility designed to eliminate the brittleness of standard JavaScript RegExp matching. Inspired by Drizzle ORM, it enables developers to construct complex regular expressions through an intuitive chainable API while statically inferring the exact shape of named capturing groups and execution outputs at compile time.</em>
 </p>
 
----
+## Tech Stack
+
+- **TypeScript**: The core logic and advanced generic type system.
+- **Bun**: Used for dependency management, test running, and linting.
+- **tsup**: Bundler for UMD, CJS, ESM, and type declarations.
+- **expect-type**: Static type assertion utility for unit testing.
+
+## Architecture
+
+TS-Rex is built upon four architectural pillars:
+
+1. **AST Generation**: Instead of manipulating strings that can easily become malformed, every chained method appends an AST node to an internal array.
+2. **Immutability**: Each method call creates and returns a completely new `RegexBuilder` instance. This allows you to safely branch regex definitions (e.g., saving a base pattern into a variable and extending it multiple times) without unintended side effects.
+3. **Phantom Type State**: As you chain methods like `.capture()`, `.optional()`, or `.or()`, TypeScript infers and records the resulting group names and optionality within the generic state. This happens entirely during compilation, imposing **zero** runtime memory overhead.
+4. **Runtime Compilation**: Calling `.compile()` collapses the AST into a native JavaScript `RegExp` instance and binds the execution context flags, returning a strict type-safe execution wrapper.
 
 ## Features
 
@@ -20,30 +35,6 @@
 - **Stateless Execution**: The `.exec()` wrapper instantiates fresh `RegExp` objects to prevent state mutation bugs associated with the `g` and `y` flags.
 - **Deep Optionality**: Quantifiers (`.optional()`, `.zeroOrMore()`) and alternations (`.or()`) correctly map captured properties to `Partial` or union types.
 - **Zero Dependencies**: Built entirely on standard TypeScript and native `RegExp`.
-
-## Installation
-
-```bash
-# via npm
-npm install @fajarnugraha37/ts-rex
-bun add @fajarnugraha37/ts-rex
-pnpm add @fajarnugraha37/ts-rex
-yarn add @fajarnugraha37/ts-rex
-
-# via jsr
-bunx jsr add @fajar/ts-rex
-npx jsr add @fajar/ts-rex
-deno add jsr:@fajar/ts-rex
-```
-
-## How It Works
-
-`ts-rex` employs an Abstract Syntax Tree (AST) architecture combined with TypeScript's generic type inference to deliver Drizzle-like "magic."
-
-1. **AST Generation**: Instead of manipulating strings that can easily become malformed, every chained method appends an AST node to an internal array.
-2. **Immutability**: Each method call creates and returns a completely new `RegexBuilder` instance. This allows you to safely branch regex definitions (e.g., saving a base pattern into a variable and extending it multiple times) without unintended side effects.
-3. **Phantom Type State**: As you chain methods like `.capture()`, `.optional()`, or `.or()`, TypeScript infers and records the resulting group names and optionality within the generic `TCaptures` state. This happens entirely during compilation, imposing **zero** runtime memory overhead.
-4. **Runtime Compilation**: Calling `.compile()` collapses the AST into a native JavaScript `RegExp` instance and binds the execution context flags, returning a strict type-safe execution wrapper.
 
 ## Core Entities
 
@@ -60,9 +51,49 @@ To effectively use this library, you should understand these core entities:
   - On failure: `{ isMatch: false, match: null }`
   - On success: `{ isMatch: true, match: string, ...[Your Captures] }`. (If the `.global()` flag is set, this becomes an `IterableIterator` of successful matches).
 
-## Usage
+## Philosophy: Auto-Escaping & Safety First
+
+To protect from malformed regular expressions, `ts-rex` heavily enforces **Automatic Escaping**. 
+
+If you use `.literal('http://')` or `.anyOf('a-z')`, the library will automatically escape all special regex characters. For example, `rx().anyOf('a-z')` complies to `[a\-z]`, meaning it searches for the literal characters "a", "-", and "z", **not** a range.
+
+> [!WARNING]  
+> Do not attempt to inject raw regex strings into builder methods. To build complex character classes (like `[a-zA-Z0-9.-]`), you must compose them using the type-safe methods:
+> 
+> ```typescript
+> // Correct way to compose ranges
+> const myClass = rx()
+>   .range('a', 'z')
+>   .or(rx().range('A', 'Z'))
+>   .or(rx().range('0', '9'))
+>   .or(rx().anyOf('.-')); 
+>   // Compiles to: (?:(?:(?:[a-z]|[A-Z])|[0-9])|[.\-])
+> ```
+> This verbose compilation behaves 100% identically to `[a-zA-Z0-9.-]` in regex engines but guarantees syntactic safety.
+
+## Getting Started
+
+### Installation
+
+```bash
+# via bun
+bun add @fajarnugraha37/ts-rex
+
+# via npm
+npm install @fajarnugraha37/ts-rex
+
+# via pnpm
+pnpm add @fajarnugraha37/ts-rex
+```
+
+> [!NOTE]  
+> This library requires TypeScript version 5.0 or higher for full advanced type inference support.
+
+## Key Features & Usage
 
 ### Basic Capturing
+
+Named capture groups automatically populate the output signature of `.exec()`.
 
 ```typescript
 import { rx } from '@fajarnugraha37/ts-rex';
@@ -89,7 +120,7 @@ if (result.isMatch) {
 
 ### Global Iteration
 
-Flags dynamically modify the return type of `.exec()`. Using the `.global()` flag changes the result from a single object to an `IterableIterator`.
+Flags dynamically modify the return type of `.exec()`. Using the `.global()` flag changes the result from a single object to an `IterableIterator`. Execution is fully stateless to avoid native `lastIndex` bugs.
 
 ```typescript
 const pattern = rx()
@@ -140,32 +171,168 @@ if (result.isMatch) {
 }
 ```
 
-## Test Coverage
+## Supported Regex Operations & Tokens
 
-The project uses `bun` for dependency management, testing, and building. The library maintains strict **99.87%** test coverage across 91 unit tests testing every syntactic edge case and static type accumulation constraint.
+`ts-rex` supports almost the entire ECMAScript (ES2024) Regular Expression syntax.
+
+### Assertions & Boundaries
+| Regex | API Method | Description |
+| :--- | :--- | :--- |
+| `^` | `.startOfInput()` | Matches the beginning of the input. |
+| `$` | `.endOfInput()` | Matches the end of the input. |
+| `\b` | `.wordBoundary()` | Matches a word boundary. |
+| `\B` | `.nonWordBoundary()` | Matches a non-word boundary. |
+| `(?=y)`| `.lookahead(builder)` | Matches only if followed by the pattern. |
+| `(?!y)`| `.negativeLookahead(builder)` | Matches only if NOT followed by the pattern. |
+| `(?<=y)`| `.lookbehind(builder)` | Matches only if preceded by the pattern. |
+| `(?<!y)`| `.negativeLookbehind(builder)`| Matches only if NOT preceded by the pattern. |
+
+### Character Classes & Escapes
+| Regex | API Method | Description |
+| :--- | :--- | :--- |
+| `.` | `.anyChar()` | Matches any single character. |
+| `\d` | `.digit()` | Matches any digit (0-9). |
+| `\D` | `.notDigit()` | Matches any character that is not a digit. |
+| `\w` | `.wordChar()` | Matches any alphanumeric character. |
+| `\W` | `.notWordChar()` | Matches any non-word character. |
+| `\s` | `.whitespace()` | Matches a single white space character. |
+| `\S` | `.notWhitespace()` | Matches a single non-white space character. |
+| `[abc]` | `.anyOf('abc')` | Matches any enclosed character (auto-escapes internals). |
+| `[^abc]`| `.noneOf('abc')` | Matches anything not enclosed. |
+| `[a-z]` | `.range('a', 'z')` | Matches a character in the specified range. |
+| `\xNN` | `.hex('NN')` | Matches a character by its 2-digit hex code. |
+| `\uNNNN`| `.unicodeChar('NNNN')` | Matches a character by its 4-digit Unicode hex value. |
+| `\u{N}` | `.unicodeCodePoint('NNNN')` | Matches a Unicode code point. |
+| `\p{P}` | `.unicodeProperty('...')` | Matches a character based on its Unicode category. |
+| `\n`, `\t`| `.newline()`, `.tab()`, etc | Named control characters. |
+
+### Quantifiers
+| Regex | API Method | Description |
+| :--- | :--- | :--- |
+| `*` | `.zeroOrMore(builder?)` | Matches 0 or more times. Maps nested captures to `Partial`. |
+| `+` | `.oneOrMore(builder?)` | Matches 1 or more times. |
+| `?` | `.optional(builder?)` | Matches 0 or 1 times. Maps nested captures to `Partial`. |
+| `{n}` | `.times(n, builder?)` | Matches exactly "n" occurrences. |
+| `{n,}` | `.atLeast(n, builder?)` | Matches at least "n" occurrences. |
+| `{n,m}`| `.between(n, m, builder?)`| Matches between "n" and "m" occurrences. |
+| `*?` | `.lazy()` | Appended to quantifiers to make them non-greedy. |
+
+### Groups & Logic
+| Regex | API Method | Description |
+| :--- | :--- | :--- |
+| `(?:x)` | `.group(builder)` | Non-capturing group. |
+| `(?<N>x)`| `.capture('N', builder)` | Named capturing group. Extracts to the TS output object. |
+| `\k<N>` | `.matchPrevious('N')` | Matches exact text captured previously. Statically checked. |
+| `x\|y` | `.or(builder)` | Matches either branch. Resolves to a TS Union type. |
+
+### Flags
+| Regex | API Method | Description |
+| :--- | :--- | :--- |
+| `g` | `.global()` | Global iteration. Changes `.exec()` return type to `IterableIterator`. |
+| `i` | `.ignoreCase()` | Case-insensitive match. |
+| `m` | `.multiline()` | Modifies `^` and `$`. |
+| `s` | `.dotAll()` | Allows `.` to match newlines. |
+| `d` | `.withIndices()` | Appends `.indices` tuple objects into the `.exec()` return type. |
+| `v`, `y`, `u` | `.unicodeSets()`, `.sticky()`, `.unicode()` | Other modern ES context flags. |
+
+## Advanced Example: URL Parser
+
+This example demonstrates how nested captures, alternations, deep optionality, and character classes seamlessly merge into a strictly typed result object. Notice how we compose small regex builders into larger ones.
+
+```typescript
+import { rx } from '@fajarnugraha37/ts-rex';
+
+// Matches 'http' or 'https'
+const protocol = rx().capture('protocol', rx().literal('http').optional(rx().literal('s')));
+
+// Combine ranges and specific characters safely
+const alphanumeric = rx()
+  .range('a', 'z')
+  .or(rx().range('A', 'Z'))
+  .or(rx().range('0', '9'));
+
+// Password allows alphanumeric and special characters
+const passwordChars = alphanumeric.or(rx().anyOf('!@#$%^&*'));
+
+const auth = rx().capture(
+  'auth',
+  rx()
+    .capture('username', rx().oneOrMore(rx().wordChar()))
+    .literal(':')
+    .capture('password', rx().oneOrMore(passwordChars))
+    .literal('@')
+);
+
+// Domain allows lowercase letters, numbers, dot, and hyphen
+const domainChars = rx().range('a', 'z').or(rx().range('0', '9')).or(rx().anyOf('.-'));
+
+const urlParser = rx()
+  .startOfInput()
+  .group(protocol)
+  .literal('://')
+  .optional(auth) // Automatically makes auth, username, and password types Partial
+  .capture('domain', rx().oneOrMore(domainChars))
+  .optional(
+    rx()
+      .literal(':')
+      .capture('port', rx().oneOrMore(rx().digit()))
+  )
+  .optional(
+    rx()
+      .literal('/')
+      .capture('path', rx().zeroOrMore(rx().notWhitespace()))
+  )
+  .endOfInput()
+  .compile();
+
+const parsed = urlParser.exec('https://admin:secret123@api.example.com:8080/v1/users');
+
+if (parsed.isMatch) {
+  // Types are fully mapped based on `.optional()` wrappers!
+  console.log(parsed.protocol); // "https" (Type: string)
+  console.log(parsed.domain);   // "api.example.com" (Type: string)
+  
+  // Auth details are typed as string | undefined because of `.optional(auth)`
+  if (parsed.auth) {
+    console.log(parsed.username); // "admin"
+    console.log(parsed.password); // "secret123"
+  }
+  
+  console.log(parsed.port); // "8080" (Type: string | undefined)
+  console.log(parsed.path); // "v1/users" (Type: string | undefined)
+}
+```
+
+## Structure
+
+The project relies on declaration merging across multiple files to circumvent the 300 LOC limit while maintaining a fluent API on a single class.
+
+- `/src/core/builder.ts`: Contains the foundational AST chunk engine, `RegexBuilder` class, compilation logic, and the centralized interface holding the generic signatures.
+- `/src/syntax/*.ts`: Modular implementation files attaching prototype methods (e.g., `alternation.ts`, `boundaries.ts`, `quantifiers.ts`).
+- `/src/index.ts`: The main entry point.
+- `/tests/*.test.ts`: Categorized behavioral and static type tests.
+
+## Development Workflow
+
+1. Use `bun run test` for running the isolated test suite.
+2. Use `bun run lint` to enforce formatting and style.
+3. Use `bun run build` to output common module formats into the `dist/` directory using `tsup`.
+
+## Testing
 
 | Module | % Funcs | % Lines | Uncovered Line #s |
 | :--- | :---: | :---: | :---: |
-| `src\core\builder.ts` | 100.00 | 100.00 | |
-| `src\index.ts` | 100.00 | 100.00 | |
-| `src\syntax\alternation.ts` | 100.00 | 100.00 | |
-| `src\syntax\boundaries.ts` | 100.00 | 100.00 | |
-| `src\syntax\character-classes.ts` | 100.00 | 100.00 | |
-| `src\syntax\flags.ts` | 100.00 | 100.00 | |
-| `src\syntax\groups.ts` | 100.00 | 100.00 | |
-| `src\syntax\lookarounds.ts` | 100.00 | 100.00 | |
-| `src\syntax\quantifiers.ts` | 100.00 | 97.33 | 134 (Lazy quantifier validation hook) |
-| `src\utils\escape.ts` | 100.00 | 100.00 | |
+| `src/core/builder.ts` | 100.00 | 100.00 | |
+| `src/index.ts` | 100.00 | 100.00 | |
+| `src/syntax/alternation.ts` | 100.00 | 100.00 | |
+| `src/syntax/boundaries.ts` | 100.00 | 100.00 | |
+| `src/syntax/character-classes.ts` | 100.00 | 100.00 | |
+| `src/syntax/flags.ts` | 100.00 | 100.00 | |
+| `src/syntax/groups.ts` | 100.00 | 100.00 | |
+| `src/syntax/lookarounds.ts` | 100.00 | 100.00 | |
+| `src/syntax/quantifiers.ts` | 100.00 | 97.33 | 134 (Lazy quantifier verification hook) |
+| `src/utils/escape.ts` | 100.00 | 100.00 | |
 | **All files** | **100.00** | **99.87** | |
-
-```bash
-bun install
-bun run test
-bun run lint
-bun run build
-```
-
-Tests run via `bun test` and use `expect-type` to assert static generic constraints.
 
 ## License
 

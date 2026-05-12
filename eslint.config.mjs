@@ -7,7 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    ignores: ['dist/**', 'tests/**','node_modules/**', '.changeset/**'],
+    ignores: ['dist/**', 'tests/**', 'node_modules/**', '.changeset/**', 'docs/**'],
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
