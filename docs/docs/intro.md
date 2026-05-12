@@ -107,3 +107,88 @@ Do not attempt to inject raw regex strings into builder methods. The verbosity o
 - **Flags**: Global iteration, case-insensitive, match indices, Unicode sets, and more.
 - **URL parser example**: A real-world example combining captures, optionality, and character classes.
 - **Escape hatches**: `.raw()` and `.rawClass()` for power users who need full control.
+
+## Supported Regex Operations and Tokens
+
+`ts-rex` supports almost the entire ECMAScript (ES2024) Regular Expression syntax.
+
+### Assertions and Boundaries
+
+| Regex    | API Method                     | Description                                  |
+| :------- | :----------------------------- | :------------------------------------------- |
+| `^`      | `.startOfInput()`              | Matches the beginning of the input.          |
+| `$`      | `.endOfInput()`                | Matches the end of the input.                |
+| `\b`     | `.wordBoundary()`              | Matches a word boundary.                     |
+| `\B`     | `.nonWordBoundary()`           | Matches a non-word boundary.                 |
+| `(?=y)`  | `.lookahead(builder)`          | Matches only if followed by the pattern.     |
+| `(?!y)`  | `.negativeLookahead(builder)`  | Matches only if NOT followed by the pattern. |
+| `(?<=y)` | `.lookbehind(builder)`         | Matches only if preceded by the pattern.     |
+| `(?<!y)` | `.negativeLookbehind(builder)` | Matches only if NOT preceded by the pattern. |
+
+### Character Classes and Escapes
+
+| Regex      | API Method                  | Description                                              |
+| :--------- | :-------------------------- | :------------------------------------------------------- |
+| `.`        | `.anyChar()`                | Matches any single character.                            |
+| `\d`       | `.digit()`                  | Matches any digit (0-9).                                 |
+| `\D`       | `.notDigit()`               | Matches any character that is not a digit.               |
+| `\w`       | `.wordChar()`               | Matches any alphanumeric character.                      |
+| `\W`       | `.notWordChar()`            | Matches any non-word character.                          |
+| `\s`       | `.whitespace()`             | Matches a single white space character.                  |
+| `\S`       | `.notWhitespace()`          | Matches a single non-white space character.              |
+| `[abc]`    | `.anyOf('abc')`             | Matches any enclosed character (auto-escapes internals). |
+| `[^abc]`   | `.noneOf('abc')`            | Matches anything not enclosed.                           |
+| `[a-z]`    | `.range('a', 'z')`          | Matches a character in the specified range.              |
+| `\xNN`     | `.hex('NN')`                | Matches a character by its 2-digit hex code.             |
+| `\uNNNN`   | `.unicodeChar('NNNN')`      | Matches a character by its 4-digit Unicode hex value.    |
+| `\u{N}`    | `.unicodeCodePoint('NNNN')` | Matches a Unicode code point.                            |
+| `\p{P}`    | `.unicodeProperty('...')`   | Matches a character based on its Unicode category.       |
+| `\n`, `\t` | `.newline()`, `.tab()`, etc | Named control characters.                                |
+
+### Quantifiers
+
+| Regex   | API Method                 | Description                                                 |
+| :------ | :------------------------- | :---------------------------------------------------------- |
+| `*`     | `.zeroOrMore(builder?)`    | Matches 0 or more times. Maps nested captures to `Partial`. |
+| `+`     | `.oneOrMore(builder?)`     | Matches 1 or more times.                                    |
+| `?`     | `.optional(builder?)`      | Matches 0 or 1 times. Maps nested captures to `Partial`.    |
+| `{n}`   | `.times(n, builder?)`      | Matches exactly "n" occurrences.                            |
+| `{n,}`  | `.atLeast(n, builder?)`    | Matches at least "n" occurrences.                           |
+| `{n,m}` | `.between(n, m, builder?)` | Matches between "n" and "m" occurrences.                    |
+| `*?`    | `.lazy()`                  | Appended to quantifiers to make them non-greedy.            |
+
+### Groups and Logic
+
+| Regex     | API Method               | Description                                                 |
+| :-------- | :----------------------- | :---------------------------------------------------------- |
+| `(?:x)`   | `.group(builder)`        | Non-capturing group.                                        |
+| `(?<N>x)` | `.capture('N', builder)` | Named capturing group. Extracts to the TS output object.    |
+| `\k<N>`   | `.matchPrevious('N')`    | Matches exact text captured previously. Statically checked. |
+| `x\|y`    | `.or(builder)`           | Matches either branch. Resolves to a TS Union type.         |
+
+### Flags
+
+| Regex         | API Method                                  | Description                                                            |
+| :------------ | :------------------------------------------ | :--------------------------------------------------------------------- |
+| `g`           | `.global()`                                 | Global iteration. Changes `.exec()` return type to `IterableIterator`. |
+| `i`           | `.ignoreCase()`                             | Case-insensitive match.                                                |
+| `m`           | `.multiline()`                              | Modifies `^` and `$`.                                                  |
+| `s`           | `.dotAll()`                                 | Allows `.` to match newlines.                                          |
+| `d`           | `.withIndices()`                            | Appends `.indices` tuple objects into the `.exec()` return type.       |
+| `v`, `y`, `u` | `.unicodeSets()`, `.sticky()`, `.unicode()` | Other modern ES context flags.                                         |
+
+## Testing
+
+| Module                            |  % Funcs   |  % Lines  |            Uncovered Line #s            |
+| :-------------------------------- | :--------: | :-------: | :-------------------------------------: |
+| `src/core/builder.ts`             |   100.00   |  100.00   |                                         |
+| `src/index.ts`                    |   100.00   |  100.00   |                                         |
+| `src/syntax/alternation.ts`       |   100.00   |  100.00   |                                         |
+| `src/syntax/boundaries.ts`        |   100.00   |  100.00   |                                         |
+| `src/syntax/character-classes.ts` |   100.00   |  100.00   |                                         |
+| `src/syntax/flags.ts`             |   100.00   |  100.00   |                                         |
+| `src/syntax/groups.ts`            |   100.00   |  100.00   |                                         |
+| `src/syntax/lookarounds.ts`       |   100.00   |  100.00   |                                         |
+| `src/syntax/quantifiers.ts`       |   100.00   |   97.33   | 134 (Lazy quantifier verification hook) |
+| `src/utils/escape.ts`             |   100.00   |  100.00   |                                         |
+| **All files**                     | **100.00** | **99.87** |                                         |
