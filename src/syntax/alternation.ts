@@ -10,8 +10,7 @@ declare module '../core/builder' {
     or<OtherCaptures extends Record<string, any>, OtherFlags extends Record<string, any>>(
       builder: RegexBuilder<OtherCaptures, OtherFlags>
     ): RegexBuilder<
-      (TCaptures extends DefaultCaptures ? DefaultCaptures : Partial<TCaptures>) &
-      (OtherCaptures extends DefaultCaptures ? DefaultCaptures : Partial<OtherCaptures>),
+      Partial<TCaptures> & Partial<OtherCaptures>,
       TFlags
     >;
   }

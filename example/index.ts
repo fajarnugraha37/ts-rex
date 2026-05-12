@@ -1,4 +1,4 @@
-import { rx } from "@fajarnugraha37/ts-rex";
+import { rx } from "..";
 
 simple();
 capturing();
