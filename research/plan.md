@@ -45,9 +45,9 @@ At runtime, the builder compiles AST steps into a native JavaScript `RegExp` obj
 1. **Named Capturing & Non-Capturing Groups**:
    - Implement `.capture<Name>(name, builder)`. Merges the new capture key into `TCaptures`.
    - Implement `.group(builder)` for non-capturing nested patterns.
-2. **Deep Optionality & Quantifiers**:
-   - Implement non-mutating quantifier methods: `.zeroOrMore()`, `.oneOrMore()`, `.optional()`, `.times(n)`, `.between(min, max)`.
-   - **Type Magic**: When a quantifier implies optionality (like `.optional()` or `.zeroOrMore()`), the generic type of the preceding chunk's captures must be mapped to `Partial<...>` at the type level.
+2. **Quantifiers**:
+   - Implement non-mutating wrapper quantifier methods: `.zeroOrMore(builder?)`, `.oneOrMore(builder?)`, `.optional(builder?)`, `.times(n, builder?)`, `.between(min, max, builder?)`.
+   - **Type Magic**: When a quantifier wraps a builder, the generic type of the wrapped builder's captures must be mapped to `Partial<TCaptures>` at the type level to enforce deep optionality cleanly.
    - Implement `.lazy()` to modify the previous quantifier to be non-greedy.
 3. **Alternation (Logic)**:
    - Implement `.or(builder)`.
@@ -69,4 +69,5 @@ At runtime, the builder compiles AST steps into a native JavaScript `RegExp` obj
 
 ## Verification
 - **Type Tests**: Write `.test-d.ts` to assert strict immutability, deep optionality mapping, alternation union correctness, and flag-dependent execution returns.
+- **Unit Tests**: Standard unit tests to verify native `RegExp` AST compilation and runtime mapping.ptionality mapping, alternation union correctness, and flag-dependent execution returns.
 - **Unit Tests**: Standard unit tests to verify native `RegExp` AST compilation and runtime mapping.

@@ -57,15 +57,16 @@ This document maps standard Regular Expression syntax (tokens, anchors, characte
 | `\cX` | Control Chars | `rx.controlChar('X')` | Matches a control character (e.g., `\cM` for Ctrl-M). | ⏳ Planned |
 
 ### 4. Quantifiers
+*Note: Quantifiers that encompass capturing groups MUST be used as wrapper methods to safely map optionality at the type level without crashing the compiler.*
 
 | regex keyword / dictionary | category | mapping function or contracts | description | status |
 | :--- | :--- | :--- | :--- | :--- |
-| `*` | Quantifiers | `.zeroOrMore()` | Matches the preceding item 0 or more times. | ⏳ Planned |
-| `+` | Quantifiers | `.oneOrMore()` | Matches the preceding item 1 or more times. | ⏳ Planned |
-| `?` | Quantifiers | `.optional()` | Matches the preceding item 0 or 1 times. | ⏳ Planned |
-| `{n}` | Quantifiers | `.times(n)` | Matches exactly "n" occurrences. | ⏳ Planned |
-| `{n,}` | Quantifiers | `.atLeast(n)` | Matches at least "n" occurrences. | ⏳ Planned |
-| `{n,m}` | Quantifiers | `.between(n, m)` | Matches at least "n" and at most "m" occurrences. | ⏳ Planned |
+| `*` | Quantifiers | `.zeroOrMore(builder?)` | Matches 0 or more times. When wrapping a builder, maps nested captures to `Partial`. | ⏳ Planned |
+| `+` | Quantifiers | `.oneOrMore(builder?)` | Matches 1 or more times. | ⏳ Planned |
+| `?` | Quantifiers | `.optional(builder?)` | Matches 0 or 1 times. When wrapping a builder, maps nested captures to `Partial`. | ⏳ Planned |
+| `{n}` | Quantifiers | `.times(n, builder?)` | Matches exactly "n" occurrences. | ⏳ Planned |
+| `{n,}` | Quantifiers | `.atLeast(n, builder?)`| Matches at least "n" occurrences. | ⏳ Planned |
+| `{n,m}` | Quantifiers | `.between(n, m, builder?)` | Matches at least "n" and at most "m" occurrences. | ⏳ Planned |
 | `*?`, `+?`, `??`, `{n,m}?` | Lazy Quantifiers| `.lazy()` | Modifies the preceding quantifier to match the minimum number of times. | ⏳ Planned |
 
 ### 5. Groups & Backreferences
