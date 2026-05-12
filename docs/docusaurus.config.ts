@@ -110,52 +110,31 @@ const config: Config = {
       ],
     },
     footer: {
-      style: "dark",
+      style: "light",
       links: [
         {
-          title: "Docs",
+          title: "TS-Rex",
           items: [
             {
               label: "Documentation",
               to: "/docs/intro",
             },
             {
-              label: "Examples",
-              to: "/docs/category/examples",
-            },
-            {
-              label: "API References",
-              to: "/docs/category/api-references",
+              label: "GitHub",
+              href: "https://github.com/fajarnugraha37/ts-rex",
             },
           ],
         },
         {
-          title: "Social Media",
+          title: "Author",
           items: [
             {
-              label: "GitHub",
+              label: "Fajar Abdi Nugraha",
               href: "https://github.com/fajarnugraha37",
             },
             {
               label: "LinkedIn",
               href: "https://www.linkedin.com/in/fajar-abdi-nugraha-81b26618a/",
-            },
-            {
-              label: "Instagram",
-              href: "https://www.instagram.com/fajarnugraha37/",
-            },
-          ],
-        },
-        {
-          title: "More",
-          items: [
-            {
-              label: "Examples",
-              to: "/docs/category/examples",
-            },
-            {
-              label: "GitHub",
-              href: "https://github.com/fajarnugraha37/ts-rex",
             },
           ],
         },

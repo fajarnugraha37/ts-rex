@@ -238,10 +238,10 @@ export default function Home(): ReactNode {
               Tested on the edge. Built to integrate anywhere.
             </p>
             <div className={styles.integrationGrid} style={{ justifyContent: 'center' }}>
-              <div className={styles.integrationPill}>🟢 Bun Native</div>
-              <div className={styles.integrationPill}>⚡ tsup Bundled</div>
-              <div className={styles.integrationPill}>🦕 Deno Compatible</div>
-              <div className={styles.integrationPill}>📦 ESM & CJS</div>
+              <div className={styles.integrationPill}>🟢 Bun Js</div>
+              <div className={styles.integrationPill}>⚡ Node Js</div>
+              <div className={styles.integrationPill}>🦕 Deno </div>
+              <div className={styles.integrationPill}>📦 UMD, ESM and CJS</div>
               <div className={styles.integrationPill}>✅ 100% Test Coverage</div>
             </div>
           </div>

@@ -5,7 +5,10 @@
  */
 
 /* You can override the default Infima variables here. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   --ifm-color-primary: #16a34a;
   --ifm-color-primary-dark: #149242;
   --ifm-color-primary-darker: #138a3e;
@@ -13,8 +16,13 @@
   --ifm-color-primary-light: #18b442;
   --ifm-color-primary-lighter: #19bc46;
   --ifm-color-primary-lightest: #1dd352;
-  --ifm-code-font-size: 95%;
+  --ifm-code-font-size: 90%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-heading-font-weight: 700;
+  
+  /* Softer light mode backgrounds */
+  --ifm-background-color: #f1f5f9; /* Slate-100 */
+  --ifm-background-surface-color: #ffffff;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -27,4 +35,41 @@
   --ifm-color-primary-lighter: #bbf7d0;
   --ifm-color-primary-lightest: #f0fdf4;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-background-color: #0f1115;
+  --ifm-background-surface-color: #16181d;
+}
+
+/* Glassmorphism Navbar */
+.navbar {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: none !important;
+}
+
+[data-theme='dark'] .navbar {
+  background-color: rgba(15, 17, 21, 0.75) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Minimal Footer Override */
+.footer {
+  background-color: transparent !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 3rem 0 !important;
+}
+
+[data-theme='dark'] .footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Code block sleeker radius */
+.theme-code-block {
+  border-radius: 12px !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .theme-code-block {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
