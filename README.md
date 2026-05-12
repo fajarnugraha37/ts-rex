@@ -71,6 +71,13 @@ If you use `.literal('http://')` or `.anyOf('a-z')`, the library will automatica
 > ```
 > This verbose compilation behaves 100% identically to `[a-zA-Z0-9.-]` in regex engines but guarantees syntactic safety.
 
+### Power User Escape Hatches
+
+If you find the strict composition syntax too limiting and need to inject raw, unescaped regex strings, `ts-rex` provides two escape hatches for power users:
+
+1. **`.rawClass(str: string)`**: Generates `[str]` exactly as typed without any auto-escaping protection. (Example: `rx().rawClass('a-zA-Z0-9.-')` -> `[a-zA-Z0-9.-]`).
+2. **`.raw(str: string)`**: Allows you to freely inject any raw regex pattern directly into the AST. Use this cautiously as it completely bypasses the library's syntactic safety engine.
+
 ## Getting Started
 
 ### Installation
@@ -334,6 +341,8 @@ The project relies on declaration merging across multiple files to circumvent th
 | `src/utils/escape.ts` | 100.00 | 100.00 | |
 | **All files** | **100.00** | **99.87** | |
 
+---
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE). (Semua milik allah - Aldi Taher)
