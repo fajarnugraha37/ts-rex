@@ -9,10 +9,13 @@ export interface ASTNode {
   // Add other properties as needed in the future
 }
 
-export interface CompiledRegex<TCaptures, TFlags> {
+export interface CompiledRegex<
+  TCaptures,
+  TFlags
+> {
   pattern: string;
   native: RegExp;
-  exec: (str: string) => { captures: TCaptures; flags: TFlags } | null;
+  exec: (str: string) => TCaptures | null;
 }
 
 export class RegexBuilder<
@@ -60,12 +63,22 @@ export class RegexBuilder<
    * Tidak akan muncul di dokumentasi publik.
    */
   _test_setFlag<K extends string, V extends boolean>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _flag: K,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _value: V
   ): RegexBuilder<TCaptures, Omit<TFlags, K> & Record<K, V>> {
     return new RegexBuilder<TCaptures, Omit<TFlags, K> & Record<K, V>>(this.chunks);
+  }
+
+  private _buildPattern(nodes: ASTNode[]): string {
+    return nodes
+      .map((node) => {
+        let result = node.value || '';
+        if (node.children) {
+          result += this._buildPattern(node.children);
+        }
+        return result;
+      })
+      .join('');
   }
 
   /**
@@ -73,9 +86,10 @@ export class RegexBuilder<
    * Implementation stubbed out for Phase 1.
    */
   compile(): CompiledRegex<TCaptures, TFlags> {
+    const pattern = this._buildPattern(this.chunks);
     return {
-      pattern: '',
-      native: new RegExp(''),
+      pattern,
+      native: new RegExp(pattern),
       exec: () => null,
     };
   }
