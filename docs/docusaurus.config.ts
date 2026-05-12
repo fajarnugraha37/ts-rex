@@ -15,10 +15,10 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https://ts-rex.nugrahafajar.my.id",
+  url: "https:/nugrahafajar.my.id",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl: "/ts-rex/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
