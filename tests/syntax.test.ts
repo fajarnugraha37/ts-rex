@@ -108,6 +108,18 @@ describe('Phase 2: Core Syntax, Boundaries & Escapes', () => {
     });
   });
 
+  describe('Power User Escape Hatches', () => {
+    test('raw() injects exact string without escaping', () => {
+      const pattern = rx().raw('(?<custom>a|b)+').compile().pattern;
+      expect(pattern).toBe('(?<custom>a|b)+');
+    });
+
+    test('rawClass() injects exact string wrapped in brackets without escaping', () => {
+      const pattern = rx().rawClass('a-zA-Z0-9.-').compile().pattern;
+      expect(pattern).toBe('[a-zA-Z0-9.-]');
+    });
+  });
+
   describe('Execution Output', () => {
     test('should actually compile to a valid RegExp', () => {
       const reg = rx()

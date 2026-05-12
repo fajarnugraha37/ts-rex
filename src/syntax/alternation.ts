@@ -1,21 +1,5 @@
 import { RegexBuilder } from '../core/builder';
 
-declare module '../core/builder' {
-  interface RegexBuilder<TCaptures, TFlags> {
-    /**
-     * Matches either the pattern built so far OR the passed builder pattern.
-     * Maps to `(?:...|...)`.
-     * Calculates the union of captures from both branches, representing mutual exclusivity.
-     */
-    or<OtherCaptures extends Record<string, unknown>, OtherFlags extends Record<string, unknown>>(
-      builder: RegexBuilder<OtherCaptures, OtherFlags>
-    ): RegexBuilder<
-      Partial<TCaptures> & Partial<OtherCaptures>,
-      TFlags
-    >;
-  }
-}
-
 RegexBuilder.prototype.or = function <
   OtherCaptures extends Record<string, unknown>,
   OtherFlags extends Record<string, unknown>
