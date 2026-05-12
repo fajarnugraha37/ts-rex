@@ -1,10 +1,10 @@
 export * from './core/builder';
 export type { DefaultFlags, DefaultCaptures } from './core/builder';
 
-import './syntax/character-classes';
-import './syntax/boundaries';
-import './syntax/groups';
-import './syntax/quantifiers';
-import './syntax/alternation';
-import './syntax/lookarounds';
-import './syntax/flags';
+export * from './syntax/character-classes';
+export * from './syntax/boundaries';
+export * from './syntax/groups';
+export * from './syntax/quantifiers';
+export * from './syntax/alternation';
+export * from './syntax/lookarounds';
+export * from './syntax/flags';

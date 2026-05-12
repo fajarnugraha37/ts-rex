@@ -46,13 +46,13 @@ describe('Phase 4: Flags & Execution Engine', () => {
       const result = b.compile().exec('John Doe');
 
       // Due to the generic Record<never, never> merging we use Simplify or just assert structural match
-      expect(result).toMatchObject({ firstName: 'John', lastName: 'Doe' });
+      expect(result).toMatchObject({ match: 'John Doe', firstName: 'John', lastName: 'Doe' });
     });
 
     test('standard non-global match returns null on failure', () => {
       const b = rx().literal('apple').capture('val', rx().anyChar());
       const result = b.compile().exec('banana');
-      expect(result).toBeNull();
+      expect(result).toMatchObject({ isMatch: false, match: null });
     });
 
     test('global match returns an IterableIterator', () => {
@@ -63,8 +63,8 @@ describe('Phase 4: Flags & Execution Engine', () => {
 
       const matches = Array.from(result);
       expect(matches.length).toBe(2);
-      expect(matches[0]).toEqual({ num: '3' });
-      expect(matches[1]).toEqual({ num: '42' });
+      expect(matches[0]).toMatchObject({ match: '3', num: '3' });
+      expect(matches[1]).toMatchObject({ match: '42', num: '42' });
     });
 
     test('global execution is completely stateless', () => {
@@ -90,11 +90,11 @@ describe('Phase 4: Flags & Execution Engine', () => {
       const text = '1';
       
       const firstRun = compiled.exec(text);
-      expect(firstRun).toEqual({ num: '1' });
+      expect(firstRun).toMatchObject({ match: '1', num: '1' });
 
       // Call it again. A stateful sticky regex would fail here because lastIndex=1.
       const secondRun = compiled.exec(text);
-      expect(secondRun).toEqual({ num: '1' });
+      expect(secondRun).toMatchObject({ match: '1', num: '1' });
     });
 
     test('withIndices (d) injects indices property at type level and runtime', () => {
@@ -105,11 +105,13 @@ describe('Phase 4: Flags & Execution Engine', () => {
       const result = compiled.exec(text);
       
       // Type assertion: result should have an `indices` property mapping 'num' to [number, number]
-      expectTypeOf(result).toMatchTypeOf<{ num: string; indices: { num: [number, number] } } | null>();
+      expectTypeOf(result).toMatchTypeOf<{ match: string; num: string; indices: { match: [number, number]; num: [number, number] } } | null>();
       
       expect(result).not.toBeNull();
+      expect(result?.match).toBe('1');
       expect(result?.num).toBe('1');
       expect(result?.indices).toBeDefined();
+      expect(result?.indices.match).toEqual([1, 2]);
       expect(result?.indices.num).toEqual([1, 2]);
     });
   });

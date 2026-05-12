@@ -13,20 +13,29 @@ export interface ASTNode {
 }
 
 /**
+ * Represents a single match result, including capture groups, the full match, and optional indices.
+ */
+export type SingleMatch<TCaptures, TFlags> = TCaptures & { isMatch: true; match: string } &
+  (TFlags extends { hasIndices: true } 
+    ? { readonly indices: Record<keyof TCaptures, [number, number]> & { match: [number, number] } } 
+    : {});
+
+/**
+ * Represents a failed match, providing safe null/undefined access to properties.
+ */
+export type FailedMatch<TCaptures, TFlags> = { isMatch: false; match: null } &
+  { [K in keyof TCaptures]: undefined } &
+  (TFlags extends { hasIndices: true } 
+    ? { readonly indices: undefined } 
+    : {});
+
+/**
  * Represents the result of a regex execution, handling global iterators and null matches.
  */
 export type MatchResult<TCaptures, TFlags> =
   TFlags extends { global: true }
     ? IterableIterator<SingleMatch<TCaptures, TFlags>>
-    : SingleMatch<TCaptures, TFlags> | null;
-
-/**
- * Represents a single match result, including capture groups and optional indices.
- */
-export type SingleMatch<TCaptures, TFlags> = TCaptures & 
-  (TFlags extends { hasIndices: true } 
-    ? { readonly indices: Record<keyof TCaptures, [number, number]> } 
-    : {});
+    : SingleMatch<TCaptures, TFlags> | FailedMatch<TCaptures, TFlags>;
 
 export interface CompiledRegex<
   TCaptures,
@@ -132,14 +141,16 @@ export class RegexBuilder<
       const instance = new RegExp(pattern, flags);
       
       const mapMatch = (match: RegExpExecArray): SingleMatch<TCaptures, TFlags> => {
-        const groups = (match.groups || {}) as TCaptures;
+        const groups = (match.groups || {}) as Record<string, any>;
+        const result: Record<string, any> = { isMatch: true, ...groups, match: match[0] };
+        
         if (this._flags.hasIndices && (match as any).indices) {
-          return {
-            ...groups,
-            indices: (match as any).indices.groups,
-          } as SingleMatch<TCaptures, TFlags>;
+          result.indices = {
+            ...((match as any).indices.groups || {}),
+            match: (match as any).indices[0],
+          };
         }
-        return groups as SingleMatch<TCaptures, TFlags>;
+        return result as unknown as SingleMatch<TCaptures, TFlags>;
       };
 
       if (this._flags.global) {
@@ -154,7 +165,7 @@ export class RegexBuilder<
 
       // Single match
       const match = instance.exec(str);
-      return (match ? mapMatch(match) : null) as MatchResult<TCaptures, TFlags>;
+      return (match ? mapMatch(match) : { isMatch: false, match: null }) as MatchResult<TCaptures, TFlags>;
     };
 
     return {
