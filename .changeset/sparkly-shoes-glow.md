@@ -1,5 +1,5 @@
 ---
-"@fajarnugraha37/rx-builder": minor
+"@fajarnugraha37/ts-rex": minor
 ---
 
 phase 1 enhance RegexBuilder with additional type safety and testing capabilities

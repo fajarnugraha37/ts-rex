@@ -1,5 +1,5 @@
 ---
-"@fajarnugraha37/rx-builder": patch
+"@fajarnugraha37/ts-rex": patch
 ---
 
 scaffolding: initialize TypeScript project
