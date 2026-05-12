@@ -7,14 +7,14 @@ describe('Phase 3: Grouping, Quantifiers & Alternation', () => {
     test('non-capturing group', () => {
       const b = rx().group(rx().literal('a'));
       expect(b.compile().pattern).toBe('(?:a)');
-      expectTypeOf(b).toEqualTypeOf<RegexBuilder<Record<string, never>, Record<string, never>>>();
+      expectTypeOf(b).toEqualTypeOf<RegexBuilder<Record<never, never>, Record<never, never>>>();
     });
 
     test('named capturing group', () => {
       const b = rx().capture('myGroup', rx().literal('a'));
       expect(b.compile().pattern).toBe('(?<myGroup>a)');
       expectTypeOf(b).toEqualTypeOf<
-        RegexBuilder<Record<string, never> & Record<'myGroup', string> & Record<string, never>, Record<string, never>>
+        RegexBuilder<Record<never, never> & Record<'myGroup', string> & Record<never, never>, Record<never, never>>
       >();
     });
 

@@ -1,4 +1,4 @@
-import { RegexBuilder } from '../core/builder';
+import { RegexBuilder, type DefaultCaptures } from '../core/builder';
 
 declare module '../core/builder' {
   interface RegexBuilder<TCaptures, TFlags> {
@@ -7,11 +7,11 @@ declare module '../core/builder' {
      * Maps to `(?:...|...)`.
      * Calculates the union of captures from both branches, representing mutual exclusivity.
      */
-    or<OtherCaptures extends Record<string, any>, OtherFlags extends Record<string, boolean>>(
+    or<OtherCaptures extends Record<string, any>, OtherFlags extends Record<string, any>>(
       builder: RegexBuilder<OtherCaptures, OtherFlags>
     ): RegexBuilder<
-      (TCaptures extends Record<string, never> ? Record<string, never> : Partial<TCaptures>) &
-      (OtherCaptures extends Record<string, never> ? Record<string, never> : Partial<OtherCaptures>),
+      (TCaptures extends DefaultCaptures ? DefaultCaptures : Partial<TCaptures>) &
+      (OtherCaptures extends DefaultCaptures ? DefaultCaptures : Partial<OtherCaptures>),
       TFlags
     >;
   }
@@ -19,7 +19,7 @@ declare module '../core/builder' {
 
 RegexBuilder.prototype.or = function <
   OtherCaptures extends Record<string, any>,
-  OtherFlags extends Record<string, boolean>
+  OtherFlags extends Record<string, any>
 >(builder: RegexBuilder<OtherCaptures, OtherFlags>) {
   // b1.or(b2) -> (?: b1 | b2 )
   return new RegexBuilder([

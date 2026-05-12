@@ -1,6 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import { expectTypeOf } from "expect-type";
-import { rx, RegexBuilder, entityKind, type DefaultFlags } from "../src/index";
+import { rx, RegexBuilder, entityKind, type DefaultFlags, type DefaultCaptures } from "../src/index";
 
 describe("Phase 1: Core Architecture & Nominal Typing", () => {
   test("should create a builder instance with empty state", () => {
@@ -23,17 +23,16 @@ describe("Phase 1: Core Architecture & Nominal Typing", () => {
 
     // Check types
     expectTypeOf(b1).toEqualTypeOf<
-      RegexBuilder<Record<string, never>, DefaultFlags>
+      RegexBuilder<Record<never, never>, DefaultFlags>
     >();
     expectTypeOf(b2).toEqualTypeOf<
-      RegexBuilder<Record<string, never>, DefaultFlags>
+      RegexBuilder<Record<never, never>, DefaultFlags>
     >();
   });
 
   test("phantom properties exist only at type level", () => {
     const builder = rx();
     // At runtime, the property should be undefined since it is only declared
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((builder as any)._).toBeUndefined();
   });
 
@@ -43,7 +42,7 @@ describe("Phase 1: Core Architecture & Nominal Typing", () => {
   });
 
   test("generic state accumulation: captures", () => {
-    const b1 = rx(); // RegexBuilder<Record<string, never>, DefaultFlags>
+    const b1 = rx(); // RegexBuilder<Record<never, never>, DefaultFlags>
 
     // Mensimulasikan penambahan capture group di level tipe
     // Misal kita punya internal method untuk menambah tipe capture
@@ -51,11 +50,11 @@ describe("Phase 1: Core Architecture & Nominal Typing", () => {
 
     // Pastikan tipe berubah menjadi { userId: string }
     expectTypeOf(b2).toEqualTypeOf<
-      RegexBuilder<Record<string, never> & Record<"userId", string>, DefaultFlags>
+      RegexBuilder<Record<never, never> & Record<"userId", string>, DefaultFlags>
     >();
 
     // Pastikan b1 tetap kosong (Immutability)
-    expectTypeOf(b1).toEqualTypeOf<RegexBuilder<Record<string, never>, DefaultFlags>>();
+    expectTypeOf(b1).toEqualTypeOf<RegexBuilder<Record<never, never>, DefaultFlags>>();
   });
 
   test("generic state accumulation: flags", () => {
@@ -63,9 +62,9 @@ describe("Phase 1: Core Architecture & Nominal Typing", () => {
     const b2 = b1._test_setFlag<"global", true>("global", true);
 
     expectTypeOf(b2).toEqualTypeOf<
-      RegexBuilder<Record<string, never>, Omit<DefaultFlags, "global"> & Record<"global", true>>
+      RegexBuilder<Record<never, never>, Omit<DefaultFlags, "global"> & Record<"global", true>>
     >();
-    expectTypeOf(b1).toEqualTypeOf<RegexBuilder<Record<string, never>, DefaultFlags>>();
+    expectTypeOf(b1).toEqualTypeOf<RegexBuilder<Record<never, never>, DefaultFlags>>();
   });
 
   test("AST chunks are deep copied", () => {

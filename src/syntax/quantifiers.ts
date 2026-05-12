@@ -74,7 +74,7 @@ RegexBuilder.prototype.zeroOrMore = function <InnerCaptures extends Record<strin
     prefix: '(?:',
     suffix: ')*',
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
 
 RegexBuilder.prototype.oneOrMore = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
@@ -85,7 +85,7 @@ RegexBuilder.prototype.oneOrMore = function <InnerCaptures extends Record<string
     prefix: '(?:',
     suffix: ')+',
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
 
 RegexBuilder.prototype.optional = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
@@ -96,7 +96,7 @@ RegexBuilder.prototype.optional = function <InnerCaptures extends Record<string,
     prefix: '(?:',
     suffix: ')?',
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
 
 RegexBuilder.prototype.times = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
@@ -109,7 +109,7 @@ RegexBuilder.prototype.times = function <InnerCaptures extends Record<string, an
     prefix: '(?:',
     suffix: `){${n}}`,
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
 
 RegexBuilder.prototype.atLeast = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
@@ -122,7 +122,7 @@ RegexBuilder.prototype.atLeast = function <InnerCaptures extends Record<string, 
     prefix: '(?:',
     suffix: `){${n},}`,
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
 
 RegexBuilder.prototype.between = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
@@ -138,7 +138,7 @@ RegexBuilder.prototype.between = function <InnerCaptures extends Record<string, 
     prefix: '(?:',
     suffix: `){${min},${max}}`,
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
 
 RegexBuilder.prototype.lazy = function () {
@@ -153,5 +153,5 @@ RegexBuilder.prototype.lazy = function () {
   const newLastChunk = { ...lastChunk, suffix: (lastChunk.suffix || '') + '?' };
   const newChunks = this.chunks.slice(0, -1).concat(newLastChunk);
   
-  return new RegexBuilder(newChunks) as unknown as RegexBuilder<Record<string, never>, DefaultFlags>;
+  return new RegexBuilder(newChunks) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
 };
