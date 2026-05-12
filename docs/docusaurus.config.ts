@@ -97,6 +97,11 @@ const config: Config = {
           label: "Examples", 
           position: "left" 
         },
+        { 
+          to: "/docs/category/api-references", 
+          label: "API References", 
+          position: "left" 
+        },
         {
           href: "https://github.com/fajarnugraha37/ts-rex",
           label: "GitHub",

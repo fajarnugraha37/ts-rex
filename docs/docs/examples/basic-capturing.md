@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
-title: Named capture groups with static type inference
+title: Example - Named Capture Groups
+description: Learn how to use named capture groups with static type inference in TS-Rex. See how .capture() provides type-safe match results.
 ---
 
 # Named capture groups with static type inference

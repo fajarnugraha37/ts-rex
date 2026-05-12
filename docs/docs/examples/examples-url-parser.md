@@ -1,5 +1,7 @@
 ---
 sidebar_position: 4
+title: Example: Real-world URL Parser
+description: A comprehensive example of building a URL parser using TS-Rex. Demonstrates nested captures, optionality, and character class composition.
 ---
 
 # URL parser: composing captures and optionality
