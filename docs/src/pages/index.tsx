@@ -14,15 +14,22 @@ function HomepageHeader() {
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
         <Heading as="h1" className="hero__title">
-          {siteConfig.title}
+          🦖 TS-Rex
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Get Started
+            Get Started - 5 min ⏱️
           </Link>
+          <a
+            className="button button--outline button--secondary button--lg margin-left--md"
+            href="https://github.com/fajarnugraha37/ts-rex"
+            target="_blank"
+            rel="noopener noreferrer">
+            View on GitHub
+          </a>
         </div>
       </div>
     </header>
@@ -33,8 +40,8 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`Home | ${siteConfig.title}`}
+      description="A TypeScript library for constructing regular expressions using a fluent builder API. Compile-time type safety for capturing groups.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

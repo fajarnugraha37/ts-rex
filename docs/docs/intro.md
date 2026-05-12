@@ -1,11 +1,12 @@
 ---
 sidebar_position: 1
-title: Introduction
+title: Introduction to TS-Rex
+description: Learn how to use TS-Rex, a type-safe regex builder for TypeScript that provides compile-time capture group inference and zero-dependency pattern construction.
 ---
 
-# What is TS-Rex? Architecture, entities, and concepts
+# Introduction to TS-Rex: The Type-Safe Regex Builder
 
-TS-Rex uses AST generation, phantom types, and immutable chaining to infer named capture group types at compile time with zero runtime overhead.
+TS-Rex is a fluent-API library for TypeScript that simplifies regular expression construction. It leverages advanced TypeScript generics to provide compile-time inference for named capture groups, stateless execution, and full ES2024 compliance.
 
 TS-Rex is a zero-dependency TypeScript library that lets you construct complex regular expressions through a chainable API and automatically infers the exact shape of named capturing groups at compile time. Instead of writing opaque regex strings and manually casting match results, you chain human-readable methods — and TypeScript knows the type of every capture before you run a single line.
 

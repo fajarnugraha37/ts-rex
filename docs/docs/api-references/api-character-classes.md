@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
-title: Character Classes and Escapes
+title: API Reference Character Classes & Escapes
+description: Complete reference for TS-Rex character class and escape methods, including digit, wordChar, anyOf, range, hex, and unicodeProperty.
 ---
 
 # Character Classes and Escapes — TS-Rex API Reference

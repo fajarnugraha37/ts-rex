@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
-title: CompiledRegex Interface and `exec()`
+title: API Reference CompiledRegex & exec()
+description: Learn about the CompiledRegex interface, the stateless exec method, and the MatchResult discriminated union types.
 ---
 
 # CompiledRegex Interface and `exec()` — TS-Rex API

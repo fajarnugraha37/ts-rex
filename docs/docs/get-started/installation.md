@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
-title: Installation
+title: Installation Guide
+description: Install TS-Rex in your project using npm, pnpm, yarn, or bun. Requires TypeScript 5.0+ for full type-safety.
 ---
 
 # Install TS-Rex in your TypeScript project today

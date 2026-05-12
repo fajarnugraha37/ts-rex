@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
-title: Boundary Assertions
+title: Boundary Assertions Reference
+description: API reference for TS-Rex boundary methods like startOfInput, endOfInput, and wordBoundary. Learn how to anchor your TypeScript regex patterns.
 ---
 
 # Boundary Assertions — TS-Rex API Reference

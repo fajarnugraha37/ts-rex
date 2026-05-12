@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
-title: Infers capture group types at compile time
+title: Type Inference System
+description: Deep dive into how TS-Rex uses phantom generics and TypeScript's type system to infer capture group types at compile time.
 ---
 
 # How TS-Rex infers capture group types at compile time

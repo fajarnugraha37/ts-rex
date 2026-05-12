@@ -1,6 +1,7 @@
 ---
 sidebar_position: 3
-title: Automatic escaping and regex pattern safety
+title: Automatic Escaping & Pattern Safety
+description: TS-Rex automatically escapes special regex characters for you. Understand how this prevents malformed patterns and enhances safety.
 ---
 
 # Automatic escaping and regex pattern safety

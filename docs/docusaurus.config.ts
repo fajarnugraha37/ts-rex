@@ -15,10 +15,10 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https:/nugrahafajar.my.id",
+  url: "https://ts-rex.nugrahafajar.my.id",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/ts-rex/",
+  baseUrl: "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -69,6 +69,10 @@ const config: Config = {
   ],
 
   themeConfig: {
+    metadata: [
+      { name: 'keywords', content: 'typescript, regex, regular-expression, type-safe, fluent-api, builder, inference, es2024' },
+      { name: 'description', content: 'TS-Rex: A type-safe, fluent-API regex builder for TypeScript. Features automatic capture group inference, stateless execution, and full ES2024 compliance.' },
+    ],
     // Replace with your project's social card
     image: "img/social-card.png",
     colorMode: {
