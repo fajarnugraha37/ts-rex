@@ -14,6 +14,10 @@
   <em><b>TS-Rex</b> is a zero-dependency, meta-programming utility designed to eliminate the brittleness of standard JavaScript RegExp matching. Inspired by Drizzle ORM, it enables developers to construct complex regular expressions through an intuitive chainable API while statically inferring the exact shape of named capturing groups and execution outputs at compile time.</em>
 </p>
 
+<p align="center">
+  <a href="https://ts-rex.nugrahafajar.my.id/"><b>Read the Official Documentation</b></a>
+</p>
+
 ---
 
 ## Tech Stack
