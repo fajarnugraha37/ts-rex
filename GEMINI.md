@@ -1,6 +1,7 @@
 ## Project
 
 You are an expert TypeScript engineer. We are building a zero-dependency, Type-Safe Fluent Regex Builder.
+Please read and understand ./research/*.md as the main knowledge of the background of this library.
 
 ## Rules of Engagement
 
