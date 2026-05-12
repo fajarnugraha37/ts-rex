@@ -2,17 +2,23 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/index.ts"],
-  format: ["cjs", "esm"],
-  dts: true, // Akan menghasilkan dist/index.d.ts yang sudah ter-merge
+  format: ["cjs", "esm", "iife"],   // ← tambah iife
+  dts: true,
   minify: true,
   clean: true,
   splitting: true,
   treeshake: true,
   target: "es2020",
-  platform: "neutral", // Agar aman digunakan di Browser, Node, Bun, dan Deno
+  platform: "neutral",
+
+  // Nama global yang akan dipasang di window (ganti sesuai nama library kamu)
+  globalName: "TsRex",               // window.TsRex = ...
+
+  // Ekstensi file output
   outExtension({ format }) {
-    return {
-      js: format === "cjs" ? ".cjs" : ".mjs",
-    };
-  }
+    if (format === "cjs") return { js: ".cjs" };
+    if (format === "esm") return { js: ".mjs" };
+    if (format === "iife") return { js: ".umd.js" }; // atau .umd.js
+    return { js: ".js" };
+  },
 });

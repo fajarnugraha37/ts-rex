@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integration Test (Browser)</title>
+  </head>
+  <body>
+    <h1>Integration Test (Browser)</h1>
+    <h2 id="console-results">Check the console for results</h2>
+    <div>
+      <code>
+        Result 1:
+        <pre id="result_1"></pre>
+        <br />
+        Result 2:
+        <pre id="result_2"></pre>
+      </code>
+    </div>
+    <script src="../../dist/index.umd.js"></script>
+    <script>
+
+      const consoleResults = document.getElementById("console-results");
+      const result1 = document.getElementById("result_1");
+      const result2 = document.getElementById("result_2");
+      if (TsRex) {
+        consoleResults.textContent = "TsRex is loaded and available!";
+      } else {
+        consoleResults.textContent = "Failed to load TsRex.";
+      }
+
+      const literal = TsRex.rx().literal("test").nonWordBoundary().compile();
+      const literalResult = literal.exec("testing");
+
+      if (literalResult.isMatch) {
+        console.log(literalResult.match);
+        result1.textContent = "Literal matched: " + literalResult.match;
+      }
+
+      const capture = TsRex.rx()
+        .capture("foo", TsRex.rx().literal("a"))
+        .withIndices()
+        .compile();
+      const captureResult = capture.exec("a");
+
+      if (captureResult.isMatch) {
+        console.log(captureResult.match);
+        console.log(captureResult.foo);
+        console.log(captureResult.indices);
+        result2.textContent = "Capture matched: " + captureResult.match;
+      }
+    </script>
+  </body>
+</html>
