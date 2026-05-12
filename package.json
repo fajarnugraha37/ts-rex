@@ -39,7 +39,7 @@
     "type": "git",
     "url": "git+https://github.com/fajarnugraha37/ts-rex.git"
   },
-  "homepage": "https://nugrahafajar.my.id/ts-rex/",
+  "homepage": "https://ts-rex.nugrahafajar.my.id/",
   "license": "MIT",
   "scripts": {
     "build": "bun run lint && bunx tsc --noEmit && rm -rf dist && bunx tsc && bunx tsup",

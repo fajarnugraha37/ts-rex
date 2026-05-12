@@ -1,4 +1,4 @@
-# The TS Rex
+# Type-Safe Regex (TS-Rex) without the headache
 
 [![NPM Version](https://img.shields.io/npm/v/@fajarnugraha37/ts-rex.svg)](https://www.npmjs.com/package/@fajarnugraha37/ts-rex) [![JSR Version](https://jsr.io/badges/@fajar/ts-rex)](https://jsr.io/@fajar/ts-rex)
 

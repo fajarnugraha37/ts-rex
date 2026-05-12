@@ -1,54 +1,56 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
+// Lucide Icons
+import { Code2, Zap, ShieldCheck, Layers, PackageCheck, GitBranch } from 'lucide-react';
+
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  Icon: React.FC<React.SVGProps<SVGSVGElement>>;
   description: ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
   {
     title: 'Static type inference',
-    Svg: require('@site/static/img/type-inference.svg').default,
+    Icon: Code2,
     description: (
       <>
-        Named captures are inferred directly from your builder chain at compile time. No type assertions, no as string, no surprises.
+        Named captures are inferred directly from your builder chain at compile time. No type assertions, no surprises.
       </>
     ),
   },
   {
     title: 'Stateless execution',
-    Svg: require('@site/static/img/stateless.svg').default,
+    Icon: Zap,
     description: (
       <>
-        Every .exec() call creates a fresh RegExp instance, making global-flag iteration safe and free of lastIndex bugs.
+        Every <code>.exec()</code> call creates a fresh RegExp instance, making global-flag iteration safe and free of lastIndex bugs.
       </>
     ),
   },
   {
     title: 'Automatic escaping',
-    Svg: require('@site/static/img/escaping.svg').default,
+    Icon: ShieldCheck,
     description: (
       <>
-        .literal() and .anyOf() auto-escape special characters. You cannot accidentally inject a malformed pattern through these methods.
+        <code>.literal()</code> and <code>.anyOf()</code> auto-escape special characters. You cannot accidentally inject a malformed pattern.
       </>
     ),
   },
   {
     title: 'Deep optionality',
-    Svg: require('@site/static/img/optionality.svg').default,
+    Icon: Layers,
     description: (
       <>
-        Quantifiers like .optional() and .zeroOrMore() automatically mark inner capture types as string | undefined in the result.
+        Quantifiers like <code>.optional()</code> automatically mark inner capture types as <code>string | undefined</code> in the result.
       </>
     ),
   },
   {
     title: 'Zero dependencies',
-    Svg: require('@site/static/img/dependencies.svg').default,
+    Icon: PackageCheck,
     description: (
       <>
         Built entirely on standard TypeScript and native RegExp. Nothing extra is installed at runtime.
@@ -57,36 +59,36 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Immutable builder',
-    Svg: require('@site/static/img/immutability.svg').default,
+    Icon: GitBranch,
     description: (
       <>
-        Every method call returns a new RegexBuilder instance. You can safely branch a base pattern into multiple variations without side effects.
+        Every method call returns a new RegexBuilder. You can safely branch a base pattern into multiple variations.
       </>
     ),
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, Icon, description}: FeatureItem) {
   return (
-    <div className={clsx('col col--4')}>
-      <div className={styles.featureCard}>
-        <div className="text--center">
-          <Svg className={styles.featureSvg} role="img" />
-        </div>
-        <div className="text--center">
-          <Heading as="h3" className={styles.featureTitle}>{title}</Heading>
-          <p className={styles.featureDescription}>{description}</p>
-        </div>
+    <div className={styles.featureCard}>
+      <div className={styles.featureIconWrapper}>
+        <Icon className={styles.featureSvg} strokeWidth={2} />
       </div>
+      <Heading as="h3" className={styles.featureTitle}>{title}</Heading>
+      <p className={styles.featureDescription}>{description}</p>
     </div>
   );
 }
 
 export default function HomepageFeatures(): ReactNode {
   return (
-    <section className={styles.features}>
-      <div className="container">
-        <div className="row">
+    <section className={styles.featuresSection}>
+      {/* Background ambient glows */}
+      <div className={styles.glowOrb1} />
+      <div className={styles.glowOrb2} />
+      
+      <div className={styles.container}>
+        <div className={styles.featureGrid}>
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
           ))}

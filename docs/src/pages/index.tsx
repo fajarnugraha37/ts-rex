@@ -11,24 +11,28 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
-        <Heading as="h1" className="hero__title">
-          🦖 TS-Rex
+    <header className={clsx('hero', styles.heroBanner)}>
+      <div className="container" style={{ position: 'relative', zIndex: 2 }}>
+        <Heading as="h1" className={styles.heroTitle}>
+          <span className={styles.heroTitleGradient}>Type-Safe</span> Regex
+          <br/>without the headache.
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className={styles.heroSubtitle}>
+          Drizzle-inspired, fluent-API Regex builder for modern TypeScript. <br/>
+          Automatically infers named capture groups, ensures stateless execution, and compiles to native RegExp.
+        </p>
         <div className={styles.buttons}>
           <Link
-            className="button button--secondary button--lg"
+            className={clsx("button button--primary button--lg", styles.primaryBtn)}
             to="/docs/intro">
-            Get Started - 5 min ⏱️
+            Read the Docs
           </Link>
           <a
-            className="button button--outline button--secondary button--lg margin-left--md"
+            className={clsx("button button--outline button--secondary button--lg margin-left--md", styles.secondaryBtn)}
             href="https://github.com/fajarnugraha37/ts-rex"
             target="_blank"
             rel="noopener noreferrer">
-            View on GitHub
+            GitHub
           </a>
         </div>
       </div>
