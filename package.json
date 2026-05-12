@@ -1,0 +1,60 @@
+{
+  "name": "@fajarnugraha37/rx-builder",
+  "version": "0.0.1",
+  "description": "A TypeScript library for building Regex patterns.",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "regex",
+    "builder",
+    "fluent-api",
+    "typescript",
+    "meta-programming"
+  ],
+  "author": {
+    "name": "Fajar Abdi Nugraha",
+    "email": "nugrahafajar37@gmail.com",
+    "url": "https://nugrahafajar.my.id"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fajarnugraha37/rx-builder.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "bun run lint && bunx tsc --noEmit && rm -rf dist && bunx tsc && bunx tsup",
+    "test": "bun test --isolate",
+    "lint": "eslint .",
+    "release": "changeset publish",
+    "tag": "changeset tag"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "latest",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "glob": "^13.0.6",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript-eslint": "^8.59.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
