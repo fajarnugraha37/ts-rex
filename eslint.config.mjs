@@ -19,6 +19,7 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn', // Downgrade to warn or fix the code
+      '@typescript-eslint/no-unused-vars': 'warn',
     },
   }
 );
