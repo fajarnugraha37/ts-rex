@@ -3,7 +3,7 @@
 <h1 align="center">
   <a href="https://github.com/fajarnugraha37/ts-rex">
     <picture>
-      <img height="300" alt="TS-Rex Logo" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/docs/logo.png">
+      <img height="300" alt="TS-Rex Logo" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/assets/logo.png">
     </picture>
   </a>
 </h1>
