@@ -1,9 +1,0 @@
-{
-    "name": "TS-Rex Documentation",
-    "out": "docs",
-    "readme": "./README.md",
-    "plugin": [
-        "typedoc-github-theme",
-    ],
-    "theme": "typedoc-github-theme",
-}

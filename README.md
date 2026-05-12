@@ -1,9 +1,11 @@
-# TS-Rex
+# The TS Rex
+
+[![NPM Version](https://img.shields.io/npm/v/@fajarnugraha37/ts-rex.svg)](https://www.npmjs.com/package/@fajarnugraha37/ts-rex) [![JSR Version](https://jsr.io/badges/@fajar/ts-rex)](https://jsr.io/@fajar/ts-rex)
 
 <h1 align="center">
   <a href="https://github.com/fajarnugraha37/ts-rex">
     <picture>
-      <img height="300" alt="TS-Rex Logo" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/assets/logo.png">
+      <img height="500" alt="TS-Rex Logo" src="https://raw.githubusercontent.com/fajarnugraha37/ts-rex/refs/heads/main/assets/logo.png">
     </picture>
   </a>
 </h1>
@@ -12,10 +14,12 @@
   <em><b>TS-Rex</b> is a zero-dependency, meta-programming utility designed to eliminate the brittleness of standard JavaScript RegExp matching. Inspired by Drizzle ORM, it enables developers to construct complex regular expressions through an intuitive chainable API while statically inferring the exact shape of named capturing groups and execution outputs at compile time.</em>
 </p>
 
+---
+
 ## Tech Stack
 
-- **TypeScript**: The core logic and advanced generic type system.
-- **Bun**: Used for dependency management, test running, and linting.
+- [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/): The core logic and advanced generic type system.
+- [![Bun](https://img.shields.io/badge/Bun-1.0+-green.svg)](https://bun.sh/): Used for dependency management, test running, and linting.
 - **tsup**: Bundler for UMD, CJS, ESM, and type declarations.
 - **expect-type**: Static type assertion utility for unit testing.
 
@@ -51,7 +55,7 @@ To effectively use this library, you should understand these core entities:
   - On failure: `{ isMatch: false, match: null }`
   - On success: `{ isMatch: true, match: string, ...[Your Captures] }`. (If the `.global()` flag is set, this becomes an `IterableIterator` of successful matches).
 
-## Philosophy: Auto-Escaping & Safety First
+## Philosophy: Auto-Escaping and Safety First
 
 To protect from malformed regular expressions, `ts-rex` heavily enforces **Automatic Escaping**. 
 
@@ -71,32 +75,32 @@ If you use `.literal('http://')` or `.anyOf('a-z')`, the library will automatica
 > ```
 > This verbose compilation behaves 100% identically to `[a-zA-Z0-9.-]` in regex engines but guarantees syntactic safety.
 
-### Power User Escape Hatches
-
-If you find the strict composition syntax too limiting and need to inject raw, unescaped regex strings, `ts-rex` provides two escape hatches for power users:
-
-1. **`.rawClass(str: string)`**: Generates `[str]` exactly as typed without any auto-escaping protection. (Example: `rx().rawClass('a-zA-Z0-9.-')` -> `[a-zA-Z0-9.-]`).
-2. **`.raw(str: string)`**: Allows you to freely inject any raw regex pattern directly into the AST. Use this cautiously as it completely bypasses the library's syntactic safety engine.
+> [!NOTE]
+> If you find the strict composition syntax too limiting and need to inject raw, unescaped regex strings, `ts-rex` provides two escape hatches for power users:
+>
+> 1. **`.rawClass(str: string)`**: Generates `[str]` exactly as typed without any auto-escaping protection. (Example: `rx().rawClass('a-zA-Z0-9.-')` -> `[a-zA-Z0-9.-]`).
+> 2. **`.raw(str: string)`**: Allows you to freely inject any raw regex pattern directly into the AST. Use this cautiously as it completely bypasses the library's syntactic safety engine.
 
 ## Getting Started
 
 ### Installation
 
 ```bash
-# via bun
+# via npmjs
 bun add @fajarnugraha37/ts-rex
-
-# via npm
 npm install @fajarnugraha37/ts-rex
-
-# via pnpm
 pnpm add @fajarnugraha37/ts-rex
+
+# via jsr
+bunx jsr add @fajar/ts-rex
+npx jsr add @fajar/ts-rex
+pnpm i jsr:@fajar/ts-rex
 ```
 
 > [!NOTE]  
 > This library requires TypeScript version 5.0 or higher for full advanced type inference support.
 
-## Key Features & Usage
+## Usage
 
 ### Basic Capturing
 
@@ -178,11 +182,11 @@ if (result.isMatch) {
 }
 ```
 
-## Supported Regex Operations & Tokens
+## Supported Regex Operations and Tokens
 
 `ts-rex` supports almost the entire ECMAScript (ES2024) Regular Expression syntax.
 
-### Assertions & Boundaries
+### Assertions and Boundaries
 | Regex | API Method | Description |
 | :--- | :--- | :--- |
 | `^` | `.startOfInput()` | Matches the beginning of the input. |
@@ -194,7 +198,7 @@ if (result.isMatch) {
 | `(?<=y)`| `.lookbehind(builder)` | Matches only if preceded by the pattern. |
 | `(?<!y)`| `.negativeLookbehind(builder)`| Matches only if NOT preceded by the pattern. |
 
-### Character Classes & Escapes
+### Character Classes and Escapes
 | Regex | API Method | Description |
 | :--- | :--- | :--- |
 | `.` | `.anyChar()` | Matches any single character. |
@@ -224,7 +228,7 @@ if (result.isMatch) {
 | `{n,m}`| `.between(n, m, builder?)`| Matches between "n" and "m" occurrences. |
 | `*?` | `.lazy()` | Appended to quantifiers to make them non-greedy. |
 
-### Groups & Logic
+### Groups and Logic
 | Regex | API Method | Description |
 | :--- | :--- | :--- |
 | `(?:x)` | `.group(builder)` | Non-capturing group. |

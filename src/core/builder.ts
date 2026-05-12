@@ -1,48 +1,101 @@
+/**
+ * A unique symbol used for nominal typing to identify RegexBuilder instances.
+ */
 export const entityKind: unique symbol = Symbol.for('regex:entityKind');
 
+/**
+ * Represents the default state for regex flags (all disabled).
+ */
 export type DefaultFlags = Record<string, never>;
 
+/**
+ * Represents the default state for captured groups (empty).
+ */
 export type DefaultCaptures = Record<string, never>;
 
+/**
+ * Represents a node in the internal Abstract Syntax Tree of the regex.
+ */
 export interface ASTNode {
+  /** The type of regex component (e.g., 'literal', 'class', 'capture'). */
   type: string;
+  /** The raw string value of the pattern chunk. */
   value?: string;
+  /** Nested nodes (used for groups, quantifiers, and alternations). */
   children?: ASTNode[];
+  /** String to prepend to the node during compilation. */
   prefix?: string;
+  /** String to append to the node during compilation. */
   suffix?: string;
 }
 
 /**
- * Represents a single match result, including capture groups, the full match, and optional indices.
+ * Represents a successful match result.
+ * 
+ * @typeParam TCaptures - The record of named capture groups inferred from the builder.
+ * @typeParam TFlags - The active regex flags.
  */
-export type SingleMatch<TCaptures, TFlags> = TCaptures & { isMatch: true; match: string } &
+export type SingleMatch<TCaptures, TFlags> = TCaptures & { 
+  /** Indicates the match was successful. */
+  isMatch: true; 
+  /** The full text matched by the entire regex. */
+  match: string; 
+} &
   (TFlags extends { hasIndices: true } 
-    ? { readonly indices: Record<keyof TCaptures, [number, number]> & { match: [number, number] } } 
+    ? { 
+        /** Start and end offsets for each capture group. Requires the 'd' flag. */
+        readonly indices: Record<keyof TCaptures, [number, number]> & { match: [number, number] } 
+      } 
     : Record<string, never>);
 
 /**
  * Represents a failed match, providing safe null/undefined access to properties.
+ * 
+ * @typeParam TCaptures - The record of named capture groups that would have been returned.
+ * @typeParam TFlags - The active regex flags.
  */
-export type FailedMatch<TCaptures, TFlags> = { isMatch: false; match: null } &
+export type FailedMatch<TCaptures, TFlags> = { 
+  /** Indicates the match failed. */
+  isMatch: false; 
+  /** Always null on failure. */
+  match: null; 
+} &
   { [K in keyof TCaptures]: undefined } &
   (TFlags extends { hasIndices: true } 
-    ? { readonly indices: undefined } 
+    ? { 
+        /** Always undefined on failure. */
+        readonly indices: undefined 
+      } 
     : Record<string, never>);
 
 /**
- * Represents the result of a regex execution, handling global iterators and null matches.
+ * The unified return type of the {@link CompiledRegex.exec} method.
+ * Handles single matches, failed matches, and global iterators.
  */
 export type MatchResult<TCaptures, TFlags> =
   TFlags extends { global: true }
     ? IterableIterator<SingleMatch<TCaptures, TFlags>>
     : SingleMatch<TCaptures, TFlags> | FailedMatch<TCaptures, TFlags>;
 
+/**
+ * The compiled output of a {@link RegexBuilder}.
+ */
 export interface CompiledRegex<
   TCaptures,
   TFlags
 > {
+  /** The generated raw regex pattern string. */
   pattern: string;
+  /** The native JavaScript RegExp instance. */
   native: RegExp;
+  /** 
+   * Executes the regex against a string.
+   * This method is stateless; it creates a fresh RegExp instance for every call
+   * to avoid `lastIndex` side-effects.
+   * 
+   * @param str - The input string to test.
+   * @returns A {@link MatchResult} containing the match data or an iterator.
+   */
   exec: (str: string) => MatchResult<TCaptures, TFlags>;
 }
 
@@ -211,6 +264,20 @@ export interface RegexBuilder<
    * Maps to `\B`.
    */
   nonWordBoundary(): RegexBuilder<TCaptures, TFlags>;
+
+  /**
+   * **Power User Escape Hatch**: Injects the exact string into the AST without any auto-escaping protection.
+   * Allows freely injecting raw regex patterns if the fluent syntax is too restrictive.
+   * @param str The raw regex string to inject.
+   */
+  raw(str: string): RegexBuilder<TCaptures, TFlags>;
+
+  /**
+   * **Power User Escape Hatch**: Generates `[str]` exactly as typed without any auto-escaping protection.
+   * Use this to construct complex, unescaped character ranges manually.
+   * @param str The raw regex string to wrap in brackets.
+   */
+  rawClass(str: string): RegexBuilder<TCaptures, TFlags>;
 
   /**
    * Matches the nested builder pattern but does not remember the match (non-capturing group).
