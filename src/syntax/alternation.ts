@@ -1,4 +1,4 @@
-import { RegexBuilder, type DefaultCaptures } from '../core/builder';
+import { RegexBuilder } from '../core/builder';
 
 declare module '../core/builder' {
   interface RegexBuilder<TCaptures, TFlags> {
@@ -7,7 +7,7 @@ declare module '../core/builder' {
      * Maps to `(?:...|...)`.
      * Calculates the union of captures from both branches, representing mutual exclusivity.
      */
-    or<OtherCaptures extends Record<string, any>, OtherFlags extends Record<string, any>>(
+    or<OtherCaptures extends Record<string, unknown>, OtherFlags extends Record<string, unknown>>(
       builder: RegexBuilder<OtherCaptures, OtherFlags>
     ): RegexBuilder<
       Partial<TCaptures> & Partial<OtherCaptures>,
@@ -17,11 +17,12 @@ declare module '../core/builder' {
 }
 
 RegexBuilder.prototype.or = function <
-  OtherCaptures extends Record<string, any>,
-  OtherFlags extends Record<string, any>
+  OtherCaptures extends Record<string, unknown>,
+  OtherFlags extends Record<string, unknown>
 >(builder: RegexBuilder<OtherCaptures, OtherFlags>) {
   // b1.or(b2) -> (?: b1 | b2 )
-  return new RegexBuilder([
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>([
     {
       type: 'or',
       prefix: '(?:',
@@ -31,5 +32,5 @@ RegexBuilder.prototype.or = function <
         { type: 'branch', prefix: '|', children: builder.chunks },
       ],
     },
-  ]) as unknown as RegexBuilder<any, any>;
+  ]);
 };

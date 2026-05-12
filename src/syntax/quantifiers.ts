@@ -1,4 +1,4 @@
-import { RegexBuilder, type DefaultFlags } from '../core/builder';
+import { RegexBuilder } from '../core/builder';
 
 declare module '../core/builder' {
   interface RegexBuilder<TCaptures, TFlags> {
@@ -7,7 +7,7 @@ declare module '../core/builder' {
      * Maps to `(?:...)*`.
      * At the type level, marks all inner captures as optional.
      */
-    zeroOrMore<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    zeroOrMore<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & Partial<InnerCaptures>, TFlags>;
 
@@ -15,7 +15,7 @@ declare module '../core/builder' {
      * Matches the wrapped pattern 1 or more times.
      * Maps to `(?:...)+`.
      */
-    oneOrMore<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    oneOrMore<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & InnerCaptures, TFlags>;
 
@@ -24,7 +24,7 @@ declare module '../core/builder' {
      * Maps to `(?:...)?`.
      * At the type level, marks all inner captures as optional.
      */
-    optional<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    optional<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & Partial<InnerCaptures>, TFlags>;
 
@@ -32,7 +32,7 @@ declare module '../core/builder' {
      * Matches the wrapped pattern exactly "n" occurrences.
      * Maps to `(?:...){n}`.
      */
-    times<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    times<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       n: number,
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & InnerCaptures, TFlags>;
@@ -42,7 +42,7 @@ declare module '../core/builder' {
      * Maps to `(?:...){n,}`.
      * At the type level, if n = 0, inner captures are marked optional.
      */
-    atLeast<N extends number, InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    atLeast<N extends number, InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       n: N,
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & (N extends 0 ? Partial<InnerCaptures> : InnerCaptures), TFlags>;
@@ -52,7 +52,7 @@ declare module '../core/builder' {
      * Maps to `(?:...){min,max}`.
      * At the type level, if min = 0, inner captures are marked optional.
      */
-    between<Min extends number, InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    between<Min extends number, InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       min: Min,
       max: number,
       builder: RegexBuilder<InnerCaptures, InnerFlags>
@@ -66,66 +66,71 @@ declare module '../core/builder' {
   }
 }
 
-RegexBuilder.prototype.zeroOrMore = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.zeroOrMore = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({
     type: 'quantifier',
     prefix: '(?:',
     suffix: ')*',
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  });
 };
 
-RegexBuilder.prototype.oneOrMore = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.oneOrMore = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({
     type: 'quantifier',
     prefix: '(?:',
     suffix: ')+',
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  });
 };
 
-RegexBuilder.prototype.optional = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.optional = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({
     type: 'quantifier',
     prefix: '(?:',
     suffix: ')?',
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  });
 };
 
-RegexBuilder.prototype.times = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.times = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   n: number,
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
   if (n < 0 || !Number.isInteger(n)) throw new Error('Quantifier "times" expects a positive integer');
-  return this._chain({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({
     type: 'quantifier',
     prefix: '(?:',
     suffix: `){${n}}`,
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  });
 };
 
-RegexBuilder.prototype.atLeast = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.atLeast = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   n: number,
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
   if (n < 0 || !Number.isInteger(n)) throw new Error('Quantifier "atLeast" expects a positive integer');
-  return this._chain({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({
     type: 'quantifier',
     prefix: '(?:',
     suffix: `){${n},}`,
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  });
 };
 
-RegexBuilder.prototype.between = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.between = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   min: number,
   max: number,
   builder: RegexBuilder<InnerCaptures, InnerFlags>
@@ -133,12 +138,13 @@ RegexBuilder.prototype.between = function <InnerCaptures extends Record<string, 
   if (min < 0 || !Number.isInteger(min) || max < 0 || !Number.isInteger(max) || min > max) {
     throw new Error('Quantifier "between" expects min <= max and both positive integers');
   }
-  return this._chain({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({
     type: 'quantifier',
     prefix: '(?:',
     suffix: `){${min},${max}}`,
     children: builder.chunks,
-  }) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  });
 };
 
 RegexBuilder.prototype.lazy = function () {
@@ -153,5 +159,6 @@ RegexBuilder.prototype.lazy = function () {
   const newLastChunk = { ...lastChunk, suffix: (lastChunk.suffix || '') + '?' };
   const newChunks = this.chunks.slice(0, -1).concat(newLastChunk);
   
-  return new RegexBuilder(newChunks) as unknown as RegexBuilder<Record<never, never>, DefaultFlags>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(newChunks, this._flags);
 };

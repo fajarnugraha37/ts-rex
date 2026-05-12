@@ -52,33 +52,41 @@ declare module '../core/builder' {
 }
 
 RegexBuilder.prototype.global = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, global: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, global: true });
 };
 
 RegexBuilder.prototype.ignoreCase = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, ignoreCase: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, ignoreCase: true });
 };
 
 RegexBuilder.prototype.multiline = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, multiline: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, multiline: true });
 };
 
 RegexBuilder.prototype.dotAll = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, dotAll: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, dotAll: true });
 };
 
 RegexBuilder.prototype.unicode = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, unicode: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, unicode: true });
 };
 
 RegexBuilder.prototype.unicodeSets = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, unicodeSets: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, unicodeSets: true });
 };
 
 RegexBuilder.prototype.sticky = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, sticky: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, sticky: true });
 };
 
 RegexBuilder.prototype.withIndices = function () {
-  return new RegexBuilder(this.chunks, { ...this._flags, hasIndices: true }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new RegexBuilder<any, any>(this.chunks, { ...this._flags, hasIndices: true });
 };

@@ -1,8 +1,8 @@
 export const entityKind: unique symbol = Symbol.for('regex:entityKind');
 
-export type DefaultFlags = {};
+export type DefaultFlags = Record<string, never>;
 
-export type DefaultCaptures = {};
+export type DefaultCaptures = Record<string, never>;
 
 export interface ASTNode {
   type: string;
@@ -18,7 +18,7 @@ export interface ASTNode {
 export type SingleMatch<TCaptures, TFlags> = TCaptures & { isMatch: true; match: string } &
   (TFlags extends { hasIndices: true } 
     ? { readonly indices: Record<keyof TCaptures, [number, number]> & { match: [number, number] } } 
-    : {});
+    : Record<string, never>);
 
 /**
  * Represents a failed match, providing safe null/undefined access to properties.
@@ -27,7 +27,7 @@ export type FailedMatch<TCaptures, TFlags> = { isMatch: false; match: null } &
   { [K in keyof TCaptures]: undefined } &
   (TFlags extends { hasIndices: true } 
     ? { readonly indices: undefined } 
-    : {});
+    : Record<string, never>);
 
 /**
  * Represents the result of a regex execution, handling global iterators and null matches.
@@ -47,8 +47,8 @@ export interface CompiledRegex<
 }
 
 export class RegexBuilder<
-  TCaptures extends Record<string, any> = DefaultCaptures,
-  TFlags extends Record<string, any> = DefaultFlags
+  TCaptures extends Record<string, unknown> = DefaultCaptures,
+  TFlags extends Record<string, unknown> = DefaultFlags
 > {
   /**
    * Phantom properties to carry type information at compile time
@@ -75,8 +75,8 @@ export class RegexBuilder<
    * This explicitly enforces the immutability architectural pillar.
    */
   _chain<
-    NewCaptures extends Record<string, any> = TCaptures,
-    NewFlags extends Record<string, any> = TFlags
+    NewCaptures extends Record<string, unknown> = TCaptures,
+    NewFlags extends Record<string, unknown> = TFlags
   >(chunk: ASTNode): RegexBuilder<NewCaptures, NewFlags> {
     return new RegexBuilder<NewCaptures, NewFlags>([...this.chunks, chunk], this._flags);
   }
@@ -97,6 +97,8 @@ export class RegexBuilder<
     _flag: K,
     _value: V
   ): RegexBuilder<TCaptures, Omit<TFlags, K> & Record<K, V>> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const __unused = { _flag, _value };
     return new RegexBuilder<TCaptures, Omit<TFlags, K> & Record<K, V>>(this.chunks, this._flags);
   }
 
@@ -141,26 +143,31 @@ export class RegexBuilder<
       const instance = new RegExp(pattern, flags);
       
       const mapMatch = (match: RegExpExecArray): SingleMatch<TCaptures, TFlags> => {
-        const groups = (match.groups || {}) as Record<string, any>;
-        const result: Record<string, any> = { isMatch: true, ...groups, match: match[0] };
+        const groups = (match.groups || {}) as TCaptures;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result: any = { isMatch: true, ...groups, match: match[0] };
         
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (this._flags.hasIndices && (match as any).indices) {
           result.indices = {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ...((match as any).indices.groups || {}),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             match: (match as any).indices[0],
           };
         }
-        return result as unknown as SingleMatch<TCaptures, TFlags>;
+        return result as SingleMatch<TCaptures, TFlags>;
       };
 
       if (this._flags.global) {
         // Return an iterator for global matches
         return (function* () {
-          let match;
+          let match: RegExpExecArray | null;
           while ((match = instance.exec(str)) !== null) {
             yield mapMatch(match);
           }
-        })() as unknown as MatchResult<TCaptures, TFlags>;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        })() as IterableIterator<SingleMatch<TCaptures, TFlags>> as any;
       }
 
       // Single match

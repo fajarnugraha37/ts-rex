@@ -1,4 +1,4 @@
-import { rx } from "..";
+import { rx } from "../src";
 
 simple();
 capturing();

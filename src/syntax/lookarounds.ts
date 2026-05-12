@@ -6,7 +6,7 @@ declare module '../core/builder' {
      * Matches only if the current position is followed by the passed pattern.
      * Maps to `(?=...)`.
      */
-    lookahead<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    lookahead<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & InnerCaptures, TFlags>;
 
@@ -14,7 +14,7 @@ declare module '../core/builder' {
      * Matches only if the current position is not followed by the passed pattern.
      * Maps to `(?!...)`.
      */
-    negativeLookahead<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    negativeLookahead<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & InnerCaptures, TFlags>;
 
@@ -22,7 +22,7 @@ declare module '../core/builder' {
      * Matches only if the current position is preceded by the passed pattern.
      * Maps to `(?<=...)`.
      */
-    lookbehind<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    lookbehind<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & InnerCaptures, TFlags>;
 
@@ -30,7 +30,7 @@ declare module '../core/builder' {
      * Matches only if the current position is not preceded by the passed pattern.
      * Maps to `(?<!...)`.
      */
-    negativeLookbehind<InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+    negativeLookbehind<InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
       builder: RegexBuilder<InnerCaptures, InnerFlags>
     ): RegexBuilder<TCaptures & InnerCaptures, TFlags>;
 
@@ -44,32 +44,37 @@ declare module '../core/builder' {
   }
 }
 
-RegexBuilder.prototype.lookahead = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.lookahead = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({ type: 'lookahead', prefix: '(?=', suffix: ')', children: builder.chunks }) as unknown as RegexBuilder<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({ type: 'lookahead', prefix: '(?=', suffix: ')', children: builder.chunks });
 };
 
-RegexBuilder.prototype.negativeLookahead = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.negativeLookahead = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({ type: 'negativeLookahead', prefix: '(?!', suffix: ')', children: builder.chunks }) as unknown as RegexBuilder<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({ type: 'negativeLookahead', prefix: '(?!', suffix: ')', children: builder.chunks });
 };
 
-RegexBuilder.prototype.lookbehind = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.lookbehind = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({ type: 'lookbehind', prefix: '(?<=', suffix: ')', children: builder.chunks }) as unknown as RegexBuilder<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({ type: 'lookbehind', prefix: '(?<=', suffix: ')', children: builder.chunks });
 };
 
-RegexBuilder.prototype.negativeLookbehind = function <InnerCaptures extends Record<string, any>, InnerFlags extends Record<string, boolean>>(
+RegexBuilder.prototype.negativeLookbehind = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
   builder: RegexBuilder<InnerCaptures, InnerFlags>
 ) {
-  return this._chain({ type: 'negativeLookbehind', prefix: '(?<!', suffix: ')', children: builder.chunks }) as unknown as RegexBuilder<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({ type: 'negativeLookbehind', prefix: '(?<!', suffix: ')', children: builder.chunks });
 };
 
 RegexBuilder.prototype.matchPrevious = function <Name extends PropertyKey>(
   name: Name
 ) {
-  return this._chain({ type: 'backreference', value: `\\k<${name as string}>` }) as unknown as RegexBuilder<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return this._chain<any, any>({ type: 'backreference', value: `\\k<${name as string}>` });
 };
