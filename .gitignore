@@ -32,6 +32,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .vscode
 .vs
 .gemini
+GEMINI.md
 
 # Finder (MacOS) folder config
 .DS_Store
