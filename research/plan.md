@@ -3,75 +3,70 @@
 ## Background & Motivation
 The goal is to create a TypeScript regular expression builder that mimics the "magic" of Drizzle ORM. Developers often struggle with complex regex syntax and extracting data from capturing groups safely. By utilizing a fluent builder pattern and advanced TypeScript generics, we can provide a type-safe API for constructing regular expressions and, crucially, inferring the exact shape of the matched capturing groups at compile time, eliminating runtime casting and errors. This library aims for **100% ECMAScript (ES2024) standard compliance**.
 
-## Core Architectural Rules (from gemini.md)
-1. **Type Branding (`entityKind`)**: Uses `Symbol.for('regex:entityKind')` to ensure nominal type integrity and prevent structural collisions.
-2. **Immutable Builder**: Every method must return a new instance with the updated state type. Zero runtime state mutation.
-3. **State Accumulation**: Pass accumulated capture groups and flags via Generics (`TCaptures`, `TFlags`) to statically record the history of function calls.
-4. **Phantom Properties**: Store type metadata in `declare _` to ensure zero runtime memory overhead.
-5. **Strict Type-Safety**: Runtime output (`.exec()`) must strictly match the compile-time inferred type.
-6. **Strict Modularity**: Split logic into composable modules. Max 300 LOC per file.
-7. **Zero Dependencies**: Pure TypeScript and native `RegExp`.
+## Core Architectural Pillars (Critical Requirements)
+To achieve true Drizzle-level type safety and DX, the architecture MUST strictly adhere to the following principles:
 
-## Proposed Solution: AST-based Group Inference
-Similar to Drizzle ORM, the builder will not attempt to validate the raw output string literal via TypeScript. Instead, it will use generics to track the "state" of the builder—specifically, a record of the named capturing groups defined in the chain, as well as the active regex flags.
-For example, `RegexBuilder<{ id: string, name: string | undefined }, { global: false, indices: false }>` tracks that the resulting execution will yield an object with an `id` and an optional `name`. 
-At runtime, the builder will compile these steps into a native JavaScript `RegExp` object and map the `exec()` results back into the inferred object shape.
+1. **Explicit Immutability (No Shared State)**: Every method in the chain MUST return a completely new instance of the builder. The internal AST array of regex chunks must be copied, not mutated. This allows developers to branch regex definitions safely without side effects.
+2. **Deep Optionality via Quantifiers**: Quantifiers like `.optional()` or `.zeroOrMore()` do not just append a `?` or `*` to the string. At the type level, they MUST recursively map over the generic state of the preceding chunk/builder and mark all nested named captures as optional (e.g., using `Partial<TCaptures>`). The flawed `.optionalCapture` approach is strictly prohibited.
+3. **Alternation Type Merging**: The `.or(builder)` method introduces complex union types. If branch A captures `{ a: string }` and branch B captures `{ b: string }`, the resulting type must reflect mutual exclusivity (e.g., merging into a union type where absent properties might be undefined).
+4. **Flag State Tracking (`TFlags`)**: Regex flags radically alter the execution context. The generic signature MUST track flags (e.g., `TFlags extends { global: boolean, hasIndices: boolean }`). If `g` is set, `.exec()` must return an `IterableIterator`. If `d` is set, the returned match objects must contain an `indices` property.
+5. **Type Branding (Phantom Data)**: To prevent structural typing collisions (where any object with a `capture` method might be accidentally passed), the builder must use `entityKind` Symbols and phantom properties (`declare _`) to lock the AST nodes and generic metadata strictly to this library.
 
-**Crucial Constraint**: Anonymous indexed capturing groups `(x)` are strictly disallowed in the API. All captured data must be explicitly named to ensure the return type is a reliable `Record<string, string>`.
+## Proposed Solution: AST-based Inference
+The builder uses generics to track the "state": a record of named capturing groups and active flags.
+`RegexBuilder<TCaptures extends Record<string, string>, TFlags extends Record<string, boolean>>`
+
+At runtime, the builder compiles AST steps into a native JavaScript `RegExp` object and maps the `exec()` results back into the inferred object shape.
+**Crucial Constraint**: Anonymous indexed capturing groups `(x)` are strictly disallowed. All captured data must be explicitly named to ensure the return type is a reliable `Record<string, string>`.
 
 ## Implementation Phases
 
 ### Phase 1: Core Architecture & Nominal Typing
 1. **Setup Type Branding & Phantom Properties**:
    - Define `entityKind` symbol.
-   - Setup base types using `declare _` for storing the capture group shapes and flags without runtime overhead.
-2. **Define the Immutable `RegexBuilder` Class/Interface**:
-   - Generic state tracking: `class RegexBuilder<TCaptures extends Record<string, any>, TFlags extends Record<string, boolean>>`.
-   - Ensure every method returns a cloned instance with updated arrays/state.
-3. **Implement the AST/Chunk Engine**:
-   - Create an internal mechanism to store regex "chunks" (strings/AST nodes) at runtime that will be concatenated during compilation via a centralized `chainPattern` method.
-4. **Compilation Step**:
-   - Implement a `.build()` or `.compile()` method that joins the AST chunks and applies accumulated flags into a native `RegExp` instance.
+   - Setup base types using `declare _` for storing the `TCaptures` shapes and `TFlags` without runtime overhead.
+2. **Define the Immutable `RegexBuilder` Class**:
+   - Generic state tracking: `class RegexBuilder<TCaptures, TFlags>`.
+   - Implement the immutable chunk engine: Every method constructs a new array of AST nodes `[...this.chunks, newNode]` and returns `new RegexBuilder(...)`.
+3. **Compilation Step**:
+   - Implement a `.build()` or `.compile()` method that traverses the AST, concatenates the string representation, appends accumulated flags, and instantiates the native `RegExp`.
 
-### Phase 2: Core Syntax & Quantifiers
+### Phase 2: Core Syntax, Boundaries & Escapes
 *(Refer to `mapping.md` for specific method names)*
 1. **Character Classes, Control Chars & Escapes**:
    - Implement literal escaping and classes: `literal(str)`, `digit()`, `word()`, `whitespace()`, `anyChar()`.
    - Implement explicit control chars: `newline()`, `tab()`, `carriageReturn()`, `nullChar()`, `verticalTab()`, `formFeed()`, `controlChar(X)`.
    - Implement Hex/Unicode code points: `hex(NN)`, `unicodeChar(NNNN)`, `unicodeCodePoint(NNNN)`.
    - Implement ES2018+ Unicode Property Escapes: `unicodeProperty()`, `notUnicodeProperty()`.
-2. **Quantifiers**:
-   - Implement non-mutating quantifier methods: `.zeroOrMore()`, `.oneOrMore()`, `.optional()`, `.times(n)`, `.between(min, max)`.
-   - Implement `.lazy()` to modify the previous quantifier to be non-greedy.
-3. **Boundaries**:
+2. **Boundaries**:
    - Implement: `startOfInput()`, `endOfInput()`, `wordBoundary()`.
 
-### Phase 3: Grouping, Lookarounds & Logic
-1. **Non-Capturing Groups**:
-   - Implement `.group(builder)` to allow nesting patterns.
-2. **Named Capturing Groups (The Magic)**:
-   - Implement `.capture<Name>(name, builder)`.
-   - TypeScript logic: Merge the new capture key into the `TCaptures` generic using intersection/mapped types.
-   - Implement `.optionalCapture<Name>(name, builder)` adding the key as `string | undefined`.
-3. **Backreferences**:
-   - Implement `.matchPrevious<Name>(name)`.
-   - TypeScript logic: Ensure the generic constraint enforces that `Name` extends `keyof TCaptures`.
-4. **Lookarounds**:
+### Phase 3: Grouping, Quantifiers & Alternation (The Magic)
+1. **Named Capturing & Non-Capturing Groups**:
+   - Implement `.capture<Name>(name, builder)`. Merges the new capture key into `TCaptures`.
+   - Implement `.group(builder)` for non-capturing nested patterns.
+2. **Deep Optionality & Quantifiers**:
+   - Implement non-mutating quantifier methods: `.zeroOrMore()`, `.oneOrMore()`, `.optional()`, `.times(n)`, `.between(min, max)`.
+   - **Type Magic**: When a quantifier implies optionality (like `.optional()` or `.zeroOrMore()`), the generic type of the preceding chunk's captures must be mapped to `Partial<...>` at the type level.
+   - Implement `.lazy()` to modify the previous quantifier to be non-greedy.
+3. **Alternation (Logic)**:
+   - Implement `.or(builder)`.
+   - **Type Magic**: Calculates the union of `TCaptures` from the current builder and the passed builder, representing mutual exclusivity.
+4. **Lookarounds & Backreferences**:
    - Implement `.lookahead()`, `.negativeLookahead()`, `.lookbehind()`, `.negativeLookbehind()`.
-5. **Logic (Disjunction)**:
-   - Implement `.or(builder)` as a chainable method rather than a variadic `choice(...args)` to prevent TypeScript recursion depth limits and ensure clean union type calculations for captures.
+   - Implement `.matchPrevious<Name>(name)`. TypeScript ensures `Name extends keyof TCaptures`.
 
-### Phase 4: Flags & Type-Safe Execution Wrapper
+### Phase 4: Flags & Execution Engine
 1. **Flags API**:
-   - Implement fluent flags: `.global()`, `.ignoreCase()`, `.multiline()`, `.dotAll()`, `.unicode()`, `.unicodeSets()` (ES2024 `v` flag), `.sticky()`, `.withIndices()`.
-   - Update `TFlags` generic appropriately.
+   - Implement fluent flags: `.global()`, `.ignoreCase()`, `.multiline()`, `.dotAll()`, `.unicode()`, `.unicodeSets()` (ES2024 `v`), `.sticky()`, `.withIndices()`.
+   - Calling these returns a new builder with the `TFlags` generic updated.
 2. **Type Extraction Utilities**:
-   - Create `InferMatch<typeof builder>` to extract the `TCaptures` record.
-   - Adjust the extraction type based on `TFlags` (e.g., if `.global()` is used, return `IterableIterator<TCaptures>`).
+   - Create `InferMatch<typeof builder>`.
+   - Logic: If `TFlags['global']` is true, return `IterableIterator<TCaptures>`. If `TFlags['hasIndices']` is true, append `indices` to the returned record. Otherwise, return `TCaptures | null`.
 3. **Execution Logic**:
    - Implement `.exec(string)` on the builder.
-   - Run the compiled `RegExp`, extract the `groups` property, and return it typed strictly based on `TCaptures` and `TFlags`.
+   - Run the compiled `RegExp`, handle global iteration or single match extraction, map the `groups` property, and return the strongly-typed result conforming perfectly to `TCaptures` and `TFlags`.
 
 ## Verification
-- **Type Tests**: Write `.test-d.ts` (using tools like `expect-type` or `tsd` concepts) to assert TypeScript inference, specifically checking that `.matchPrevious()` rejects invalid group names, `.or()` properly unions capture properties, and `.exec()` handles flags correctly.
-- **Unit Tests**: Standard unit tests to verify native `RegExp` generation, lazy quantifiers, backreferences, ES2024 features, and `exec()` mapping correctness.
+- **Type Tests**: Write `.test-d.ts` to assert strict immutability, deep optionality mapping, alternation union correctness, and flag-dependent execution returns.
+- **Unit Tests**: Standard unit tests to verify native `RegExp` AST compilation and runtime mapping.
