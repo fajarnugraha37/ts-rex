@@ -74,13 +74,13 @@ This document maps standard Regular Expression syntax (tokens, anchors, characte
 
 | regex keyword / dictionary | category | mapping function or contracts | description | status |
 | :--- | :--- | :--- | :--- | :--- |
-| `(?:x)` | Groups | `.group(builder)` | Matches "x" but does not remember the match (non-capturing group). | ⏳ Planned |
-| `(?<Name>x)` | Groups | `.capture('Name', builder)` | Matches "x" and stores it as a named group. | ⏳ Planned |
-| `\k<Name>` | Backreferences | `.matchPrevious('Name')` | Matches exact text captured previously. Compiler verifies `Name extends keyof TGroups`. | ⏳ Planned |
+| `(?:x)` | Groups | `.group(builder)` | Matches "x" but does not remember the match (non-capturing group). | ✅ Done |
+| `(?<Name>x)` | Groups | `.capture('Name', builder)` | Matches "x" and stores it as a named group. | ✅ Done |
+| `\k<Name>` | Backreferences | `.matchPrevious('Name')` | Matches exact text captured previously. Compiler verifies `Name extends keyof TGroups`. | ✅ Done |
 
 ### 6. Logic & Syntax
 
 | regex keyword / dictionary | category | mapping function or contracts | description | status |
 | :--- | :--- | :--- | :--- | :--- |
-| `x\|y` | Disjunction | `.or(builder)`| Matches either "x" or "y" using a chainable method to avoid TS variadic recursion limits. | ⏳ Planned |
-| `\` | Escaping | `rx.literal(str)` | Escapes string input to match characters literally. | ⏳ Planned |
+| `x\|y` | Disjunction | `.or(builder)`| Matches either "x" or "y" using a chainable method to avoid TS variadic recursion limits. | ✅ Done |
+| `\` | Escaping | `rx.literal(str)` | Escapes string input to match characters literally. | ✅ Done |

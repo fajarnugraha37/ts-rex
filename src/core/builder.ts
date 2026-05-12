@@ -6,7 +6,8 @@ export interface ASTNode {
   type: string;
   value?: string;
   children?: ASTNode[];
-  // Add other properties as needed in the future
+  prefix?: string;
+  suffix?: string;
 }
 
 export interface CompiledRegex<
@@ -19,7 +20,7 @@ export interface CompiledRegex<
 }
 
 export class RegexBuilder<
-  TCaptures extends Record<string, string> = Record<string, never>,
+  TCaptures extends Record<string, any> = Record<string, never>,
   TFlags extends Record<string, boolean> = DefaultFlags
 > {
   /**
@@ -76,7 +77,7 @@ export class RegexBuilder<
         if (node.children) {
           result += this._buildPattern(node.children);
         }
-        return result;
+        return (node.prefix || '') + result + (node.suffix || '');
       })
       .join('');
   }

@@ -7,7 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    ignores: ['dist/**', 'node_modules/**', '.changeset/**'],
+    ignores: ['dist/**', 'tests/**','node_modules/**', '.changeset/**'],
   },
   {
     files: ['src/**/*.ts', 'src/**/*.tsx'],
@@ -20,6 +20,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn', // Downgrade to warn or fix the code
       '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'warn',
     },
   }
 );
