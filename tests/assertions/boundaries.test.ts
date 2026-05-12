@@ -19,11 +19,9 @@ describe('Assertions & Boundaries', () => {
     expect(b.test('this is a test')).toBe(true);
     expect(b.test('testing')).toBe(false);
   });
-
-  test('nonWordBoundary (\\B)', () => {
-    const compiled = rx().literal('test').nonWordBoundary().compile();
-    const result = compiled.exec('testing');
-    expect(result?.match).toBe(true);
-    expect(compiled.native.test('this is a test')).toBe(false);
-  });
+test('nonWordBoundary (\\B)', () => {
+  const b = rx().literal('test').nonWordBoundary().compile().native;
+  expect(b.test('testing')).toBe(true);
+  expect(b.test('this is a test')).toBe(false);
+});
 });

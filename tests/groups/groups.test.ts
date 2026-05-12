@@ -38,6 +38,6 @@ describe('Groups & Backreferences', () => {
 
     // Should NOT match mismatched quotes
     const r2 = compiled.exec(`'hello"`);
-    expect(r2).toBeNull();
+    expect(r2).toMatchObject({ isMatch: false, match: null });
   });
 });
