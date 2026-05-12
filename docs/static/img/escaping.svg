@@ -1,0 +1,6 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <path d="M50 15 L80 30 V60 C80 75 50 85 50 85 C50 85 20 75 20 60 V30 L50 15Z" fill="#FFF7ED" stroke="#FDBA74" stroke-width="3"/>
+  <text x="38" y="58" font-family="serif" font-weight="bold" font-size="28" fill="#EA580C">$</text>
+  <text x="28" y="58" font-family="serif" font-weight="bold" font-size="24" fill="#FDBA74" opacity="0.8">\</text>
+  <circle cx="75" cy="25" r="5" fill="#FED7AA"/>
+</svg>
