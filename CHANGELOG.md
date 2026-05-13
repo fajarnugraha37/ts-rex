@@ -1,5 +1,63 @@
 # @fajarnugraha37/ts-rex
 
+## 1.2.0
+
+### Minor Changes
+
+- 98dff7f: refactor: Modular Architecture & Robust Type Distribution
+
+  This Commit performs a major structural overhaul of the core library to eliminate the "God File" pattern in builder.ts, strictly adhere to the 300 LOC limit, and fix critical type resolution issues for library
+  consumers.
+
+  Core Changes:
+
+  1. Decomposition of RegexBuilder:
+     - The monolithic class was split. Method declarations now live in their respective src/syntax/ files within standalone interfaces (e.g., QuantifierMethods).
+     - Switched from Module Augmentation to Interface Inheritance. This ensures that the generated .d.ts files are flattened and robust, fixing the issue where consumers couldn't see methods like .capture()
+       or .compile().
+  2. Type Centralization:
+     - Moved all shared interfaces (ASTNode, MatchResult, SingleMatch, etc.) to src/core/types.ts.
+     - decoupled runtime logic from type definitions.
+  3. Build & Test Stabilization:
+     - Fixed SyntaxError in tests by restoring the runtime export of the entityKind symbol.
+     - Resolved verbatimModuleSyntax errors by using import type across the codebase.
+     - Achieved a 100% clean lint state by properly suppressing internal any usage.
+
+  Verification:
+
+  - Static Analysis: Confirmed that .d.ts in dist/ contains the full flattened API.
+  - Unit Tests: bun run test passes with 93/93 tests.
+  - Build: bun run build completes with 0 errors/warnings.
+
+  Impact:
+  The core builder is now < 150 lines of code. The library is significantly easier to maintain, and the developer experience for consumers is now fully type-safe and stable regardless of the import method.
+
+- a3e50d1: check
+
+### Patch Changes
+
+- eceafc7: Rrefactor: System-wide Type Safety Hardening and Documentation Alignment
+  To addresses several critical discrepancies between the documentation and the implementation, while fundamentally fixing the "type leakage" issue where complex operations were losing capture group metadata.
+
+  Core Changes:
+
+  1. Type System Refactor (Issue #2 & #5):
+     - Removed pervasive any usage in src/syntax/. Methods like .optional(), .zeroOrMore(), and .or() now correctly propagate and transform capture group types (e.g., applying Partial for optionality).
+     - Tightened matchPrevious<Name> to strictly require Name extends keyof TCaptures & string, preventing invalid backreferences at compile time.
+  2. API Consistency (Issue #1 & #3):
+     - Removed test() from README.md as it is not currently implemented in the core engine.
+     - Updated quantifier documentation to show that the builder parameter is mandatory, matching the implementation.
+  3. DX Improvements (Issue #4):
+     - Updated documentation to highlight that FailedMatch result objects provide undefined for all capture groups, allowing for safer property access patterns.
+
+  Verification:
+
+  - Static Analysis: Verified that IDE autocomplete correctly infers deep optionality and union types for nested captures.
+  - Unit Tests: Ran bun run test — all 93 tests passed.
+
+  Impact:
+  Users will now have full type safety when using complex fluent chains, with zero any types breaking the inference chain.
+
 ## 1.1.0
 
 ### Minor Changes
