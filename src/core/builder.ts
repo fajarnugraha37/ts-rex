@@ -134,42 +134,52 @@ export class RegexBuilder<
   compile(): CompiledRegex<TCaptures, TFlags> {
     const pattern = this._buildPattern(this.chunks);
     const flags = this._getFlagsString();
-    
+
     const internalNative = new RegExp(pattern, flags);
     const isGlobal = this._flags.global === true;
     const isSticky = this._flags.sticky === true;
     const hasIndices = this._flags.hasIndices === true;
 
-    // Helper to extract indices if the flag is present (isolated to avoid inline checks)
-    const extractIndices = (match: RegExpExecArray) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const indicesArr = (match as any).indices;
-      if (!indicesArr) return undefined;
-      return {
-        ...(indicesArr.groups || {}),
-        match: indicesArr[0],
-      };
-    };
-
-    // Pre-calculate the mapping function based on hasIndices
-    const mapMatch = hasIndices
-      ? (match: RegExpExecArray) => {
-          const result = { isMatch: true, match: match[0] };
-          if (match.groups) Object.assign(result, match.groups);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result as any).indices = extractIndices(match);
-          return result as SingleMatch<TCaptures, TFlags>;
-        }
-      : (match: RegExpExecArray) => {
-          // Fast path: No indices, Object.assign is much faster than spread
-          const result = { isMatch: true, match: match[0] };
-          if (match.groups) Object.assign(result, match.groups);
-          return result as SingleMatch<TCaptures, TFlags>;
-        };
-
     const failResult = { isMatch: false, match: null } as MatchResult<TCaptures, TFlags>;
 
+    // Pre-extract all capture group names from the final pattern string
+    const groupNamesMatch = pattern.matchAll(/\(\?<([a-zA-Z0-9_]+)>/g);
+    const groupNames = Array.from(groupNamesMatch).map(m => m[1]);
+
+    // Create a dynamic monomorphic class for this specific regex
+    // eslint-disable-next-line @typescript-eslint/no-extraneous-class
+    class MatchResultClass {
+      isMatch = true;
+      match: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      private _raw: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      constructor(raw: any) {
+        this.match = raw[0];
+        this._raw = raw;
+      }
+    }
+
+    for (const name of groupNames) {
+      Object.defineProperty(MatchResultClass.prototype, name, {
+        get() { return this._raw.groups?.[name]; },
+        enumerable: true
+      });
+    }
+
+    if (hasIndices) {
+      Object.defineProperty(MatchResultClass.prototype, 'indices', {
+        get() {
+          const idx = this._raw.indices;
+          if (!idx) return undefined;
+          return { ...(idx.groups || {}), match: idx[0] };
+        },
+        enumerable: true
+      });
+    }
+
     // Pre-compile the execution route
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let execFn: (str: string) => any;
 
     if (isGlobal) {
@@ -178,7 +188,7 @@ export class RegexBuilder<
           const iterInstance = new RegExp(pattern, flags);
           let match: RegExpExecArray | null;
           while ((match = iterInstance.exec(str)) !== null) {
-            yield mapMatch(match);
+            yield new MatchResultClass(match);
           }
         })();
       };
@@ -187,13 +197,13 @@ export class RegexBuilder<
         internalNative.lastIndex = 0;
         const match = internalNative.exec(str);
         internalNative.lastIndex = 0;
-        return match ? mapMatch(match) : failResult;
+        return match ? new MatchResultClass(match) : failResult;
       };
     } else {
       execFn = (str: string) => {
         // Absolute fastest path: No state mutation needed, no global iterators
         const match = internalNative.exec(str);
-        return match ? mapMatch(match) : failResult;
+        return match ? new MatchResultClass(match) : failResult;
       };
     }
 
