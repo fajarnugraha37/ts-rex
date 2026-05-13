@@ -47,8 +47,12 @@ export interface RegexBuilder<
 
   /**
    * **Power User Escape Hatch**: Injects the exact string into the AST without any auto-escaping protection.
+   * Allows manual registration of capture groups via the generic parameter.
+   * @typeParam NewCaptures - Manually specified capture groups present in the raw string.
    */
-  raw(str: string): RegexBuilder<TCaptures, TFlags>;
+  raw<NewCaptures extends Record<string, unknown> = Record<string, never>>(
+    str: string
+  ): RegexBuilder<TCaptures & NewCaptures, TFlags>;
 
   /**
    * **Power User Escape Hatch**: Generates `[str]` exactly as typed without any auto-escaping protection.

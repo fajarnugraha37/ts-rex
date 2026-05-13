@@ -61,11 +61,13 @@ export class RegexBuilder<
 
   /**
    * **Power User Escape Hatch**: Injects the exact string into the AST without any auto-escaping protection.
-   * Allows freely injecting raw regex patterns if the fluent syntax is too restrictive.
-   * @param str The raw regex string to inject.
+   * Allows manual registration of capture groups via the generic parameter.
+   * @typeParam NewCaptures - Manually specified capture groups present in the raw string.
    */
-  raw(str: string): RegexBuilder<TCaptures, TFlags> {
-    return this._chain({ type: 'raw', value: str });
+  raw<NewCaptures extends Record<string, unknown> = Record<string, never>>(
+    str: string
+  ): RegexBuilder<TCaptures & NewCaptures, TFlags> {
+    return this._chain<TCaptures & NewCaptures, TFlags>({ type: 'raw', value: str });
   }
 
   /**

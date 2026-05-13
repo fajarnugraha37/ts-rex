@@ -53,10 +53,9 @@ To effectively use this library, you should understand these core entities:
 - `CompiledRegex`: The object returned by `.compile()`. It contains:
   - `pattern`: The raw string representation of the regex.
   - `native`: The native JavaScript `RegExp` instance.
-  - `test(string)`: A fast, stateless boolean check (`true` / `false`).
   - `exec(string)`: The type-safe extractor method.
 - `MatchResult`: The discriminated union returned by `.exec()`. 
-  - On failure: `{ isMatch: false, match: null }`
+  - On failure: `{ isMatch: false, match: null, [captureName]: undefined }`
   - On success: `{ isMatch: true, match: string, ...[Your Captures] }`. (If the `.global()` flag is set, this becomes an `IterableIterator` of successful matches).
 
 ## Philosophy: Auto-Escaping and Safety First
@@ -83,7 +82,13 @@ If you use `.literal('http://')` or `.anyOf('a-z')`, the library will automatica
 > If you find the strict composition syntax too limiting and need to inject raw, unescaped regex strings, `ts-rex` provides two escape hatches for power users:
 >
 > 1. **`.rawClass(str: string)`**: Generates `[str]` exactly as typed without any auto-escaping protection. (Example: `rx().rawClass('a-zA-Z0-9.-')` -> `[a-zA-Z0-9.-]`).
-> 2. **`.raw(str: string)`**: Allows you to freely inject any raw regex pattern directly into the AST. Use this cautiously as it completely bypasses the library's syntactic safety engine.
+> 2. **`.raw<NewCaptures>(str: string)`**: Allows you to freely inject any raw regex pattern directly into the AST. The optional generic parameter allows you to manually register named capture groups for full type safety.
+>
+> ```typescript
+> const parser = rx()
+>   .raw<{ userId: string }>("(?<userId>\\d+)")
+>   .compile();
+> ```
 
 ## Getting Started
 
@@ -320,9 +325,10 @@ if (parsed.isMatch) {
 
 ## Structure
 
-The project relies on declaration merging across multiple files to circumvent the 300 LOC limit while maintaining a fluent API on a single class.
+The project relies on interface inheritance and declaration merging across multiple files to maintain a fluent API while keeping files small.
 
-- `/src/core/builder.ts`: Contains the foundational AST chunk engine, `RegexBuilder` class, compilation logic, and the centralized interface holding the generic signatures.
+- `/src/core/builder.ts`: Contains the foundational `RegexBuilder` class and compilation logic.
+- `/src/core/types.ts`: Centralized types and the core interface extended by modular syntax files.
 - `/src/syntax/*.ts`: Modular implementation files attaching prototype methods (e.g., `alternation.ts`, `boundaries.ts`, `quantifiers.ts`).
 - `/src/index.ts`: The main entry point.
 - `/tests/*.test.ts`: Categorized behavioral and static type tests.
@@ -354,4 +360,3 @@ The project relies on declaration merging across multiple files to circumvent th
 ## License
 
 This project is licensed under the [MIT License](LICENSE). (Semua milik allah - Aldi Taher)
-emua milik allah - Aldi Taher)
