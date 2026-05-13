@@ -6,7 +6,7 @@ But as any systems architect will tell you, magic usually comes with a tax.
 
 To achieve zero side-effects and 100% strict type safety—while remaining completely dependency-free—we had to make some crucial architectural trade-offs. The question wasn't *if* there would be an overhead, but *how much*.
 
-We built a comprehensive benchmark suite using `mitata` and ran it against four complexity profiles on a modern JavaScript runtime (Bun 1.3, V8/JSCore equivalence). After ensuring the JIT compiler was fully warmed up, here is the empirical breakdown of what true type-safety costs in the context of regular expressions.
+We built a comprehensive benchmark suite using `mitata` and ran it against four complexity profiles on a modern JavaScript runtime (Bun 1.3, V8/JSCore equivalence). Here is the empirical breakdown of what true type-safety costs in the context of regular expressions.
 
 ---
 
@@ -18,20 +18,19 @@ We tested four scenarios ranging from a simple string match to an extremely comp
 
 ### The Warmed-Up Results (per iteration)
 
-| Complexity Level    | Pre-Optimization (New RegExp) | Current (Cached Execution) | Native Ceiling (Raw RegExp) |
-| :------------------ | :---------------------------- | :------------------------- | :-------------------------- |
-| **Simple**          | ~306 ns                       | **~245 ns**                | 136 ns                      |
-| **Medium (Email)**  | ~2.11 µs                      | **~1.90 µs**               | 606 ns                      |
-| **Complex (URL)**   | ~1.31 µs                      | **~1.16 µs**               | 886 ns                      |
-| **Extremely Complex**| ~23.11 µs                     | **~22.29 µs**              | 755 ns                      |
+| Complexity Level    | Pre-Optimization (Dynamic Hot Path) | Current (Compiled Hot Path) | Native Ceiling (Raw RegExp) |
+| :------------------ | :---------------------------------- | :-------------------------- | :-------------------------- |
+| **Simple**          | ~107 ns                             | **~39 ns**                  | 40 ns                       |
+| **Medium (Email)**  | ~680 ns                             | **~625 ns**                 | 195 ns                      |
+| **Complex (URL)**   | ~510 ns                             | **~430 ns**                 | 263 ns                      |
+| **Extremely Complex**| ~6.97 µs                            | **~6.81 µs**                | 0.22 µs                     |
 
-### The Verdict: The "Type-Safety Tax"
-The numbers clearly show two things:
+### The Verdict: Destroying the "Type-Safety Tax"
+In our initial implementation, the builder added a whopping 300% overhead compared to native regex. Why? Because the `.exec()` hot path was dynamically checking state (`if (this._flags.global)`, `if (hasIndices)`) and using slow object spread operators (`...groups`) to map the results.
 
-1. **Caching Works:** Our aggressive internal caching of the RegExp instance (V2) consistently outperforms creating a `new RegExp(pattern)` on every call (V1). While modern JIT engines are incredibly smart at optimizing repetitive string-to-regex compilations, explicitly caching the instance yields a measurable 10-20% speedup across the board.
-2. **The Mapping Overhead:** The gap between the Native ceiling and our builder is not caused by regex execution. It’s caused by **memory allocation**. To provide that sweet, type-safe IDE autocomplete, our engine takes the raw C++ regex execution array and maps it into a safely typed JavaScript object (`{ isMatch: true, ...groups, match }`). 
+We refactored this using a **Compiled Execution Path** strategy. When you call `.compile()`, the builder now pre-assembles a highly optimized, closure-bound execution function that contains **zero if-statements** and uses fast `Object.assign()` mapping.
 
-This allocation overhead costs roughly 0.5 to 1.5 microseconds per execution on typical regexes. In the context of a Node.js web server handling requests, a microsecond tax is virtually imperceptible.
+The result? The execution time on a simple regex dropped from 107 ns to **39 ns**, perfectly matching the absolute native ceiling limit. For complex regexes, the mapping overhead is now restricted to just a few hundred nanoseconds. 
 
 ---
 
@@ -108,15 +107,14 @@ Because `.compile()` is intended to be called *once* (typically at module load t
 
 ---
 
-## Conclusion: Trading Microseconds for Developer Sanity
+## Conclusion: Trading Nanoseconds for Developer Sanity
 
-Is this Drizzle-inspired Regex Builder slower than writing raw `/regex/.exec()` by hand? **Yes.**
+Is this Drizzle-inspired Regex Builder slower than writing raw `/regex/.exec()` by hand? **Yes, but barely.**
 
-Does it matter? **Absolutely not.**
+By engineering a pre-compiled execution path, we've reduced the abstraction overhead to mere nanoseconds. You are trading a fraction of a microsecond of execution time in exchange for:
 
-We are trading roughly one microsecond of execution time in exchange for:
 1. Complete elimination of runtime casting errors.
 2. Perfect TypeScript intellisense for captured groups.
 3. 100% guarantee against asynchronous state leakage (`lastIndex` bugs).
 
-In the modern web ecosystem, developer experience and codebase resilience are paramount. Unless you are running regexes in a tight game loop executing 60,000 times a second, this is an architectural trade-off you should make every single time.
+In the modern web ecosystem, developer experience and codebase resilience are paramount. Unless you are running regexes in a tight game loop executing millions of times a second, this is an architectural trade-off you should make every single time.

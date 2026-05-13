@@ -135,60 +135,72 @@ export class RegexBuilder<
     const pattern = this._buildPattern(this.chunks);
     const flags = this._getFlagsString();
     
-    // High performance cached instance for isolated execution.
-    // This is purposefully NOT exposed externally to guarantee state immutability.
     const internalNative = new RegExp(pattern, flags);
-    const isStateful = this._flags.global || this._flags.sticky;
+    const isGlobal = this._flags.global === true;
+    const isSticky = this._flags.sticky === true;
+    const hasIndices = this._flags.hasIndices === true;
 
-    const exec = (str: string): MatchResult<TCaptures, TFlags> => {
-      const mapMatch = (match: RegExpExecArray): SingleMatch<TCaptures, TFlags> => {
-        const groups = (match.groups || {}) as TCaptures;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result: any = { isMatch: true, ...groups, match: match[0] };
-        
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (this._flags.hasIndices && (match as any).indices) {
-          result.indices = {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ...((match as any).indices.groups || {}),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            match: (match as any).indices[0],
-          };
-        }
-        return result as SingleMatch<TCaptures, TFlags>;
+    // Helper to extract indices if the flag is present (isolated to avoid inline checks)
+    const extractIndices = (match: RegExpExecArray) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const indicesArr = (match as any).indices;
+      if (!indicesArr) return undefined;
+      return {
+        ...(indicesArr.groups || {}),
+        match: indicesArr[0],
       };
+    };
 
-      if (this._flags.global) {
-        // Path B: Iterable (Stateful iteration requires isolated instance per call)
-        // We clone the regex to guarantee isolation for this specific generator
+    // Pre-calculate the mapping function based on hasIndices
+    const mapMatch = hasIndices
+      ? (match: RegExpExecArray) => {
+          const result = { isMatch: true, match: match[0] };
+          if (match.groups) Object.assign(result, match.groups);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (result as any).indices = extractIndices(match);
+          return result as SingleMatch<TCaptures, TFlags>;
+        }
+      : (match: RegExpExecArray) => {
+          // Fast path: No indices, Object.assign is much faster than spread
+          const result = { isMatch: true, match: match[0] };
+          if (match.groups) Object.assign(result, match.groups);
+          return result as SingleMatch<TCaptures, TFlags>;
+        };
+
+    const failResult = { isMatch: false, match: null } as MatchResult<TCaptures, TFlags>;
+
+    // Pre-compile the execution route
+    let execFn: (str: string) => any;
+
+    if (isGlobal) {
+      execFn = (str: string) => {
         return (function* () {
           const iterInstance = new RegExp(pattern, flags);
           let match: RegExpExecArray | null;
           while ((match = iterInstance.exec(str)) !== null) {
             yield mapMatch(match);
           }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        })() as IterableIterator<SingleMatch<TCaptures, TFlags>> as any;
-      }
-
-      // Path A: Single Match (High Performance Cached Execution)
-      if (isStateful) {
-        internalNative.lastIndex = 0; // Explicitly reset state before run
-      }
-      const match = internalNative.exec(str);
-      
-      // Safety cleanup for sticky flag (global is handled above in Path B)
-      if (isStateful) {
+        })();
+      };
+    } else if (isSticky) {
+      execFn = (str: string) => {
         internalNative.lastIndex = 0;
-      }
-
-      return (match ? mapMatch(match) : { isMatch: false, match: null }) as MatchResult<TCaptures, TFlags>;
-    };
+        const match = internalNative.exec(str);
+        internalNative.lastIndex = 0;
+        return match ? mapMatch(match) : failResult;
+      };
+    } else {
+      execFn = (str: string) => {
+        // Absolute fastest path: No state mutation needed, no global iterators
+        const match = internalNative.exec(str);
+        return match ? mapMatch(match) : failResult;
+      };
+    }
 
     return {
       pattern,
       toRegExp: () => new RegExp(pattern, flags),
-      exec,
+      exec: execFn,
     };
   }
 }
