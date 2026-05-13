@@ -1,36 +1,84 @@
 import { RegexBuilder } from '../core/builder';
+import type { RegexBuilder as IRegexBuilder } from '../core/types';
 
-RegexBuilder.prototype.lookahead = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+export interface LookaroundMethods<
+  TCaptures extends Record<string, unknown>,
+  TFlags extends Record<string, unknown>
+> {
+  /**
+   * Matches only if the current position is followed by the passed pattern.
+   * Maps to `(?=...)`.
+   */
+  lookahead<
+    InnerCaptures extends Record<string, unknown>,
+    InnerFlags extends Record<string, boolean>
+  >(
+    builder: IRegexBuilder<InnerCaptures, InnerFlags>
+  ): IRegexBuilder<TCaptures & InnerCaptures, TFlags>;
+
+  /**
+   * Matches only if the current position is not followed by the passed pattern.
+   * Maps to `(?!...)`.
+   */
+  negativeLookahead<
+    InnerCaptures extends Record<string, unknown>,
+    InnerFlags extends Record<string, boolean>
+  >(
+    builder: IRegexBuilder<InnerCaptures, InnerFlags>
+  ): IRegexBuilder<TCaptures & InnerCaptures, TFlags>;
+
+  /**
+   * Matches only if the current position is preceded by the passed pattern.
+   * Maps to `(?<=...)`.
+   */
+  lookbehind<
+    InnerCaptures extends Record<string, unknown>,
+    InnerFlags extends Record<string, boolean>
+  >(
+    builder: IRegexBuilder<InnerCaptures, InnerFlags>
+  ): IRegexBuilder<TCaptures & InnerCaptures, TFlags>;
+
+  /**
+   * Matches only if the current position is not preceded by the passed pattern.
+   * Maps to `(?<!...)`.
+   */
+  negativeLookbehind<
+    InnerCaptures extends Record<string, unknown>,
+    InnerFlags extends Record<string, boolean>
+  >(
+    builder: IRegexBuilder<InnerCaptures, InnerFlags>
+  ): IRegexBuilder<TCaptures & InnerCaptures, TFlags>;
+
+  /**
+   * Matches exact text captured by a previously named group.
+   * Maps to `\k<name>`.
+   */
+  matchPrevious<Name extends keyof TCaptures & string>(
+    name: Name
+  ): IRegexBuilder<TCaptures, TFlags>;
+}
+
+RegexBuilder.prototype.lookahead = function (builder) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({ type: 'lookahead', prefix: '(?=', suffix: ')', children: builder.chunks });
+  return (this as any)._chain({ type: 'lookahead', prefix: '(?=', suffix: ')', children: (builder as any).chunks }) as any;
 };
 
-RegexBuilder.prototype.negativeLookahead = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+RegexBuilder.prototype.negativeLookahead = function (builder) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({ type: 'negativeLookahead', prefix: '(?!', suffix: ')', children: builder.chunks });
+  return (this as any)._chain({ type: 'negativeLookahead', prefix: '(?!', suffix: ')', children: (builder as any).chunks }) as any;
 };
 
-RegexBuilder.prototype.lookbehind = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+RegexBuilder.prototype.lookbehind = function (builder) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({ type: 'lookbehind', prefix: '(?<=', suffix: ')', children: builder.chunks });
+  return (this as any)._chain({ type: 'lookbehind', prefix: '(?<=', suffix: ')', children: (builder as any).chunks }) as any;
 };
 
-RegexBuilder.prototype.negativeLookbehind = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+RegexBuilder.prototype.negativeLookbehind = function (builder) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({ type: 'negativeLookbehind', prefix: '(?<!', suffix: ')', children: builder.chunks });
+  return (this as any)._chain({ type: 'negativeLookbehind', prefix: '(?<!', suffix: ')', children: (builder as any).chunks }) as any;
 };
 
-RegexBuilder.prototype.matchPrevious = function <Name extends PropertyKey>(
-  name: Name
-) {
+RegexBuilder.prototype.matchPrevious = function (name) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({ type: 'backreference', value: `\\k<${name as string}>` });
+  return (this as any)._chain({ type: 'backreference', value: `\\k<${name as string}>` }) as any;
 };

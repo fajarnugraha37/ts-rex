@@ -16,13 +16,6 @@ The library was built to eliminate three classes of bugs that plague native `Reg
 
 Native JavaScript `RegExp` is powerful but fragile. Regex patterns are opaque strings — one typo silently breaks your logic. Named capture groups require manual type casting. Global flag mutations cause subtle `lastIndex` bugs across executions. TS-Rex solves all three problems.
 
-| Feature                   | Description                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| **Static type inference** | Named captures are inferred directly from your builder chain — no type assertions needed.    |
-| **Stateless execution**   | Fresh `RegExp` instances on every `.exec()` call prevent `lastIndex` mutation bugs entirely. |
-| **Automatic escaping**    | `.literal()` and `.anyOf()` auto-escape special characters so your patterns are always safe. |
-| **Zero dependencies**     | Built entirely on standard TypeScript and native `RegExp` — nothing extra to install.        |
-
 ## Key features
 
 | Feature                   | Description                                                                                                                                  |
@@ -150,9 +143,9 @@ Do not attempt to inject raw regex strings into builder methods. The verbosity o
 
 | Regex   | API Method                 | Description                                                 |
 | :------ | :------------------------- | :---------------------------------------------------------- |
-| `*`     | `.zeroOrMore(builder?)`    | Matches 0 or more times. Maps nested captures to `Partial`. |
-| `+`     | `.oneOrMore(builder?)`     | Matches 1 or more times.                                    |
-| `?`     | `.optional(builder?)`      | Matches 0 or 1 times. Maps nested captures to `Partial`.    |
+| `*`     | `.zeroOrMore(builder)`    | Matches 0 or more times. Maps nested captures to `Partial`. |
+| `+`     | `.oneOrMore(builder)`     | Matches 1 or more times.                                    |
+| `?`     | `.optional(builder)`      | Matches 0 or 1 times. Maps nested captures to `Partial`.    |
 | `{n}`   | `.times(n, builder?)`      | Matches exactly "n" occurrences.                            |
 | `{n,}`  | `.atLeast(n, builder?)`    | Matches at least "n" occurrences.                           |
 | `{n,m}` | `.between(n, m, builder?)` | Matches between "n" and "m" occurrences.                    |
