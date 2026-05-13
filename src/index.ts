@@ -7,4 +7,12 @@ import './syntax/lookarounds';
 import './syntax/flags';
 
 export * from './core/builder';
-export type { DefaultFlags, DefaultCaptures } from './core/builder';
+export { entityKind } from './core/types';
+export type { 
+  ASTNode, 
+  DefaultCaptures, 
+  DefaultFlags, 
+  CompiledRegex, 
+  MatchResult, 
+  SingleMatch 
+} from './core/types';
