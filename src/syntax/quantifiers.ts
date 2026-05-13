@@ -1,84 +1,62 @@
 import { RegexBuilder } from '../core/builder';
 
-RegexBuilder.prototype.zeroOrMore = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({
+RegexBuilder.prototype.zeroOrMore = function (builder) {
+  return this._chain({
     type: 'quantifier',
     prefix: '(?:',
     suffix: ')*',
     children: builder.chunks,
-  });
+  }) as any;
 };
 
-RegexBuilder.prototype.oneOrMore = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({
+RegexBuilder.prototype.oneOrMore = function (builder) {
+  return this._chain({
     type: 'quantifier',
     prefix: '(?:',
     suffix: ')+',
     children: builder.chunks,
-  });
+  }) as any;
 };
 
-RegexBuilder.prototype.optional = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({
+RegexBuilder.prototype.optional = function (builder) {
+  return this._chain({
     type: 'quantifier',
     prefix: '(?:',
     suffix: ')?',
     children: builder.chunks,
-  });
+  }) as any;
 };
 
-RegexBuilder.prototype.times = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  n: number,
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+RegexBuilder.prototype.times = function (n, builder) {
   if (n < 0 || !Number.isInteger(n)) throw new Error('Quantifier "times" expects a positive integer');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({
+  return this._chain({
     type: 'quantifier',
     prefix: '(?:',
     suffix: `){${n}}`,
     children: builder.chunks,
-  });
+  }) as any;
 };
 
-RegexBuilder.prototype.atLeast = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  n: number,
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+RegexBuilder.prototype.atLeast = function (n, builder) {
   if (n < 0 || !Number.isInteger(n)) throw new Error('Quantifier "atLeast" expects a positive integer');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({
+  return this._chain({
     type: 'quantifier',
     prefix: '(?:',
     suffix: `){${n},}`,
     children: builder.chunks,
-  });
+  }) as any;
 };
 
-RegexBuilder.prototype.between = function <InnerCaptures extends Record<string, unknown>, InnerFlags extends Record<string, boolean>>(
-  min: number,
-  max: number,
-  builder: RegexBuilder<InnerCaptures, InnerFlags>
-) {
+RegexBuilder.prototype.between = function (min, max, builder) {
   if (min < 0 || !Number.isInteger(min) || max < 0 || !Number.isInteger(max) || min > max) {
     throw new Error('Quantifier "between" expects min <= max and both positive integers');
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return this._chain<any, any>({
+  return this._chain({
     type: 'quantifier',
     prefix: '(?:',
     suffix: `){${min},${max}}`,
     children: builder.chunks,
-  });
+  }) as any;
 };
 
 RegexBuilder.prototype.lazy = function () {
@@ -93,6 +71,5 @@ RegexBuilder.prototype.lazy = function () {
   const newLastChunk = { ...lastChunk, suffix: (lastChunk.suffix || '') + '?' };
   const newChunks = this.chunks.slice(0, -1).concat(newLastChunk);
   
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new RegexBuilder<any, any>(newChunks, this._flags);
+  return new RegexBuilder(newChunks, this._flags) as any;
 };

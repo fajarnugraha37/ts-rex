@@ -419,7 +419,7 @@ export interface RegexBuilder<
    * Matches exact text captured by a previously named group.
    * Maps to `\k<name>`.
    */
-  matchPrevious<Name extends keyof TCaptures>(name: Name): RegexBuilder<TCaptures, TFlags>;
+  matchPrevious<Name extends keyof TCaptures & string>(name: Name): RegexBuilder<TCaptures, TFlags>;
 
   /**
    * Enables global matching (g flag).

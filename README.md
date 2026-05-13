@@ -224,12 +224,12 @@ if (result.isMatch) {
 ### Quantifiers
 | Regex | API Method | Description |
 | :--- | :--- | :--- |
-| `*` | `.zeroOrMore(builder?)` | Matches 0 or more times. Maps nested captures to `Partial`. |
-| `+` | `.oneOrMore(builder?)` | Matches 1 or more times. |
-| `?` | `.optional(builder?)` | Matches 0 or 1 times. Maps nested captures to `Partial`. |
-| `{n}` | `.times(n, builder?)` | Matches exactly "n" occurrences. |
-| `{n,}` | `.atLeast(n, builder?)` | Matches at least "n" occurrences. |
-| `{n,m}`| `.between(n, m, builder?)`| Matches between "n" and "m" occurrences. |
+| `*` | `.zeroOrMore(builder)` | Matches 0 or more times. Maps nested captures to `Partial`. |
+| `+` | `.oneOrMore(builder)` | Matches 1 or more times. |
+| `?` | `.optional(builder)` | Matches 0 or 1 times. Maps nested captures to `Partial`. |
+| `{n}` | `.times(n, builder)` | Matches exactly "n" occurrences. |
+| `{n,}` | `.atLeast(n, builder)` | Matches at least "n" occurrences. |
+| `{n,m}`| `.between(n, m, builder)`| Matches between "n" and "m" occurrences. |
 | `*?` | `.lazy()` | Appended to quantifiers to make them non-greedy. |
 
 ### Groups and Logic
@@ -354,3 +354,4 @@ The project relies on declaration merging across multiple files to circumvent th
 ## License
 
 This project is licensed under the [MIT License](LICENSE). (Semua milik allah - Aldi Taher)
+emua milik allah - Aldi Taher)

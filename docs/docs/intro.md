@@ -16,13 +16,6 @@ The library was built to eliminate three classes of bugs that plague native `Reg
 
 Native JavaScript `RegExp` is powerful but fragile. Regex patterns are opaque strings — one typo silently breaks your logic. Named capture groups require manual type casting. Global flag mutations cause subtle `lastIndex` bugs across executions. TS-Rex solves all three problems.
 
-| Feature                   | Description                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| **Static type inference** | Named captures are inferred directly from your builder chain — no type assertions needed.    |
-| **Stateless execution**   | Fresh `RegExp` instances on every `.exec()` call prevent `lastIndex` mutation bugs entirely. |
-| **Automatic escaping**    | `.literal()` and `.anyOf()` auto-escape special characters so your patterns are always safe. |
-| **Zero dependencies**     | Built entirely on standard TypeScript and native `RegExp` — nothing extra to install.        |
-
 ## Key features
 
 | Feature                   | Description                                                                                                                                  |
