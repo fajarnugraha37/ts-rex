@@ -80,7 +80,7 @@ describe("Phase 1: Core Architecture & Nominal Typing", () => {
   test("compilation contract: output shape", () => {
     const result = rx().compile();
     expect(typeof result.pattern).toBe("string");
-    expect(result.native).toBeInstanceOf(RegExp);
+    expect(result.toRegExp()).toBeInstanceOf(RegExp);
     expect(typeof result.exec).toBe("function");
   });
 });

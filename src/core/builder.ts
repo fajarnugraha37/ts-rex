@@ -135,13 +135,12 @@ export class RegexBuilder<
     const pattern = this._buildPattern(this.chunks);
     const flags = this._getFlagsString();
     
-    // We instantiate one native regex for inspection purposes
-    const native = new RegExp(pattern, flags);
+    // High performance cached instance for isolated execution.
+    // This is purposefully NOT exposed externally to guarantee state immutability.
+    const internalNative = new RegExp(pattern, flags);
+    const isStateful = this._flags.global || this._flags.sticky;
 
     const exec = (str: string): MatchResult<TCaptures, TFlags> => {
-      // Create a fresh instance for every execution to guarantee statelessness (avoid lastIndex bugs)
-      const instance = new RegExp(pattern, flags);
-      
       const mapMatch = (match: RegExpExecArray): SingleMatch<TCaptures, TFlags> => {
         const groups = (match.groups || {}) as TCaptures;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -160,24 +159,35 @@ export class RegexBuilder<
       };
 
       if (this._flags.global) {
-        // Return an iterator for global matches
+        // Path B: Iterable (Stateful iteration requires isolated instance per call)
+        // We clone the regex to guarantee isolation for this specific generator
         return (function* () {
+          const iterInstance = new RegExp(pattern, flags);
           let match: RegExpExecArray | null;
-          while ((match = instance.exec(str)) !== null) {
+          while ((match = iterInstance.exec(str)) !== null) {
             yield mapMatch(match);
           }
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         })() as IterableIterator<SingleMatch<TCaptures, TFlags>> as any;
       }
 
-      // Single match
-      const match = instance.exec(str);
+      // Path A: Single Match (High Performance Cached Execution)
+      if (isStateful) {
+        internalNative.lastIndex = 0; // Explicitly reset state before run
+      }
+      const match = internalNative.exec(str);
+      
+      // Safety cleanup for sticky flag (global is handled above in Path B)
+      if (isStateful) {
+        internalNative.lastIndex = 0;
+      }
+
       return (match ? mapMatch(match) : { isMatch: false, match: null }) as MatchResult<TCaptures, TFlags>;
     };
 
     return {
       pattern,
-      native,
+      toRegExp: () => new RegExp(pattern, flags),
       exec,
     };
   }

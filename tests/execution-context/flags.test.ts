@@ -7,7 +7,7 @@ describe('Execution Context (Flags)', () => {
     const builder = rx().capture('word', rx().oneOrMore(rx().wordChar())).global();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('g');
+    expect(compiled.toRegExp().flags).toBe('g');
 
     const result = compiled.exec('hello world test');
     expectTypeOf(result).toMatchTypeOf<IterableIterator<{ word: string }>>();
@@ -23,33 +23,33 @@ describe('Execution Context (Flags)', () => {
     const builder = rx().literal('hello').ignoreCase();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('i');
-    expect(compiled.native.test('HELLO')).toBe(true);
-    expect(compiled.native.test('hello')).toBe(true);
+    expect(compiled.toRegExp().flags).toBe('i');
+    expect(compiled.toRegExp().test('HELLO')).toBe(true);
+    expect(compiled.toRegExp().test('hello')).toBe(true);
   });
 
   test('multiline (m) flag matches across lines', () => {
     const builder = rx().startOfInput().literal('hello').multiline();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('m');
-    expect(compiled.native.test('foo\nhello')).toBe(true); // Should match 'hello' at start of line 2
+    expect(compiled.toRegExp().flags).toBe('m');
+    expect(compiled.toRegExp().test('foo\nhello')).toBe(true); // Should match 'hello' at start of line 2
   });
 
   test('dotAll (s) flag allows . to match newlines', () => {
     const builder = rx().literal('a').anyChar().literal('b').dotAll();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('s');
-    expect(compiled.native.test('a\nb')).toBe(true);
+    expect(compiled.toRegExp().flags).toBe('s');
+    expect(compiled.toRegExp().test('a\nb')).toBe(true);
   });
 
   test('unicode (u) flag handles unicode code points correctly', () => {
     const builder = rx().unicodeCodePoint('1F600').unicode();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('u');
-    expect(compiled.native.test('😀')).toBe(true);
+    expect(compiled.toRegExp().flags).toBe('u');
+    expect(compiled.toRegExp().test('😀')).toBe(true);
   });
 
   test('unicodeSets (v) flag handles ES2024 unicode sets', () => {
@@ -57,7 +57,7 @@ describe('Execution Context (Flags)', () => {
     try {
       const builder = rx().unicodeSets();
       const compiled = builder.compile();
-      expect(compiled.native.flags).toBe('v');
+      expect(compiled.toRegExp().flags).toBe('v');
     } catch (e) {
       // Ignore if running on older engine
     }
@@ -67,7 +67,7 @@ describe('Execution Context (Flags)', () => {
     const builder = rx().capture('n', rx().digit()).sticky();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('y');
+    expect(compiled.toRegExp().flags).toBe('y');
     
     // Stateless check
     expect(compiled.exec('1')).toMatchObject({ n: '1' });
@@ -78,7 +78,7 @@ describe('Execution Context (Flags)', () => {
     const builder = rx().capture('n', rx().digit()).withIndices();
     const compiled = builder.compile();
     
-    expect(compiled.native.flags).toBe('d');
+    expect(compiled.toRegExp().flags).toBe('d');
     
     const result = compiled.exec('a1b');
     expect(result).not.toBeNull();
@@ -94,6 +94,6 @@ describe('Execution Context (Flags)', () => {
     const compiled = builder.compile();
     
     // JS RegExp sorts flags automatically to 'gimy'
-    expect(compiled.native.flags).toBe('gimy');
+    expect(compiled.toRegExp().flags).toBe('gimy');
   });
 });

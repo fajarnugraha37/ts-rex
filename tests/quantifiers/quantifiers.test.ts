@@ -69,6 +69,6 @@ describe('Quantifiers & Deep Optionality', () => {
     const compiled = b.compile();
     
     expect(compiled.pattern).toBe('(?:.)+?end');
-    expect(compiled.native.exec('123end456end')?.[0]).toBe('123end'); // Matches the first 'end' due to laziness
+    expect(compiled.toRegExp().exec('123end456end')?.[0]).toBe('123end'); // Matches the first 'end' due to laziness
   });
 });
