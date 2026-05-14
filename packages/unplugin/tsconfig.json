@@ -8,15 +8,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "dist",
-    "baseUrl": ".",
-    "paths": {
-      "@fajarnugraha37/ts-rex": ["./src/index.ts"]
-    },
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["./src"],
+  "include": ["./src", "./tests"],
   "exclude": ["dist", "node_modules"]
 }

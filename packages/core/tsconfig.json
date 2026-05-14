@@ -8,7 +8,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "dist",
-    "baseUrl": ".",
     "paths": {
       "@fajarnugraha37/ts-rex": ["./src/index.ts"]
     },

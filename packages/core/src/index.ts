@@ -16,3 +16,6 @@ export type {
   MatchResult, 
   SingleMatch 
 } from './core/types';
+
+// Export hydrateRegex so the AOT unplugin can inject calls to it
+export { hydrateRegex } from './core/hydrate';

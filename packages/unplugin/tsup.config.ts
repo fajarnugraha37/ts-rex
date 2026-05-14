@@ -1,24 +1,16 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["cjs", "esm", "iife"],   // ← tambah iife
+  entry: [
+    'src/index.ts',
+    'src/vite.ts',
+    'src/webpack.ts',
+    'src/rollup.ts',
+    'src/esbuild.ts'
+  ],
+  format: ['cjs', 'esm'],
   dts: true,
-  minify: true,
+  splitting: false,
+  sourcemap: true,
   clean: true,
-  splitting: true,
-  treeshake: true,
-  target: "es2020",
-  platform: "neutral",
-
-  // Nama global yang akan dipasang di window (ganti sesuai nama library kamu)
-  globalName: "TsRex",               // window.TsRex = ...
-
-  // Ekstensi file output
-  outExtension({ format }) {
-    if (format === "cjs") return { js: ".cjs" };
-    if (format === "esm") return { js: ".mjs" };
-    if (format === "iife") return { js: ".umd.js" }; // atau .umd.js
-    return { js: ".js" };
-  },
 });
