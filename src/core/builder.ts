@@ -4,8 +4,6 @@ import type {
   DefaultCaptures, 
   DefaultFlags, 
   CompiledRegex, 
-  MatchResult, 
-  SingleMatch,
   RegexBuilder as IRegexBuilder
 } from './types';
 
@@ -131,6 +129,34 @@ export class RegexBuilder<
    * Compiles the AST chunks into a native RegExp object and provides execution wrappers.
    * Ensures stateless execution by re-instantiating the RegExp for global/sticky matches.
    */
+  private _extractCaptureNames(nodes: ASTNode[]): string[] {
+    const names: string[] = [];
+    for (const node of nodes) {
+      if (node.type === 'capture') {
+        // Extract from prefix which we know is constructed as `(?<Name>`
+        const match = node.prefix?.match(/^\(\?<([a-zA-Z0-9_]+)>/);
+        if (match) {
+          names.push(match[1]);
+        }
+      }
+      // raw node escape hatch allows manual captures via generic type, but we can't reliably
+      // extract names from the raw string without parsing it, which we explicitly avoid.
+      // If a user uses `.raw<{foo: string}>('(?<foo>...)')`, it will execute and work at runtime 
+      // but won't be mapped by this exact automated list. They'll have to use `match.groups.foo` manually
+      // if it falls back to native groups object, or we rely on the Proxy/Getter fallback.
+      // Wait, we can safely just extract from the AST structure we control.
+      
+      if (node.children) {
+        names.push(...this._extractCaptureNames(node.children));
+      }
+    }
+    return names;
+  }
+
+  /**
+   * Compiles the AST chunks into a native RegExp object and provides execution wrappers.
+   * Ensures stateless execution by re-instantiating the RegExp for global/sticky matches.
+   */
   compile(): CompiledRegex<TCaptures, TFlags> {
     const pattern = this._buildPattern(this.chunks);
     const flags = this._getFlagsString();
@@ -139,72 +165,151 @@ export class RegexBuilder<
     const isGlobal = this._flags.global === true;
     const isSticky = this._flags.sticky === true;
     const hasIndices = this._flags.hasIndices === true;
+    const isUnicode = this._flags.unicode === true || this._flags.unicodeSets === true;
 
-    const failResult = { isMatch: false, match: null } as MatchResult<TCaptures, TFlags>;
+    // 1. Robust AST-based capture name extraction (ignores raw() false positives)
+    const groupNames = Array.from(new Set(this._extractCaptureNames(this.chunks)));
 
-    // Pre-extract all capture group names from the final pattern string
-    const groupNamesMatch = pattern.matchAll(/\(\?<([a-zA-Z0-9_]+)>/g);
-    const groupNames = Array.from(groupNamesMatch).map(m => m[1]);
-
-    // Create a dynamic monomorphic class for this specific regex
-    // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-    class MatchResultClass {
-      isMatch = true;
-      match: string;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      private _raw: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      constructor(raw: any) {
-        this.match = raw[0];
-        this._raw = raw;
-      }
-    }
-
-    for (const name of groupNames) {
-      Object.defineProperty(MatchResultClass.prototype, name, {
-        get() { return this._raw.groups?.[name]; },
-        enumerable: true
-      });
-    }
-
-    if (hasIndices) {
-      Object.defineProperty(MatchResultClass.prototype, 'indices', {
-        get() {
-          const idx = this._raw.indices;
-          if (!idx) return undefined;
-          return { ...(idx.groups || {}), match: idx[0] };
-        },
-        enumerable: true
-      });
-    }
+    const isSimpleFastPath = groupNames.length === 0 && !hasIndices;
 
     // Pre-compile the execution route
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let execFn: (str: string) => any;
 
-    if (isGlobal) {
-      execFn = (str: string) => {
-        return (function* () {
-          const iterInstance = new RegExp(pattern, flags);
-          let match: RegExpExecArray | null;
-          while ((match = iterInstance.exec(str)) !== null) {
-            yield new MatchResultClass(match);
-          }
-        })();
-      };
-    } else if (isSticky) {
-      execFn = (str: string) => {
-        internalNative.lastIndex = 0;
-        const match = internalNative.exec(str);
-        internalNative.lastIndex = 0;
-        return match ? new MatchResultClass(match) : failResult;
-      };
+    if (isSimpleFastPath) {
+      // FAST PATH: No capture groups, no indices. Return a simple POJO.
+      if (isGlobal) {
+        execFn = (str: string) => {
+          return (function* () {
+            const iterInstance = new RegExp(pattern, flags);
+            let match: RegExpExecArray | null;
+            while ((match = iterInstance.exec(str)) !== null) {
+              yield { isMatch: true, match: match[0] };
+              // 4. Global zero-length match guard
+              if (match[0].length === 0) {
+                if (isUnicode && iterInstance.lastIndex < str.length) {
+                  // Advance correctly for unicode (handle surrogate pairs)
+                  iterInstance.lastIndex += str.codePointAt(iterInstance.lastIndex)! > 0xffff ? 2 : 1;
+                } else {
+                  iterInstance.lastIndex++;
+                }
+              }
+            }
+          })();
+        };
+      } else if (isSticky) {
+        execFn = (str: string) => {
+          internalNative.lastIndex = 0;
+          const match = internalNative.exec(str);
+          internalNative.lastIndex = 0;
+          return match ? { isMatch: true, match: match[0] } : { isMatch: false, match: null };
+        };
+      } else {
+        execFn = (str: string) => {
+          const match = internalNative.exec(str);
+          return match ? { isMatch: true, match: match[0] } : { isMatch: false, match: null };
+        };
+      }
     } else {
-      execFn = (str: string) => {
-        // Absolute fastest path: No state mutation needed, no global iterators
-        const match = internalNative.exec(str);
-        return match ? new MatchResultClass(match) : failResult;
-      };
+      // COMPLEX PATH: Requires capture group mapping and/or indices.
+      
+      // We use a constructor function instead of `class` to dynamically attach
+      // properties as enumerables on the instance so they survive `Object.keys()` and `...spread`.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function MatchResultClass(this: any, raw: RegExpExecArray | null) {
+        if (raw !== null) {
+          this.isMatch = true;
+          this.match = raw[0];
+          
+          // Eager assignment is significantly faster than Object.defineProperty for lazy getters
+          // on the hot path, and correctly populates own enumerable properties for spread/JSON.
+          if (raw.groups) {
+            for (let i = 0; i < groupNames.length; i++) {
+              const name = groupNames[i];
+              this[name] = raw.groups[name];
+            }
+          } else {
+             for (let i = 0; i < groupNames.length; i++) {
+              this[groupNames[i]] = undefined;
+            }
+          }
+        } else {
+          this.isMatch = false;
+          this.match = null;
+
+          for (let i = 0; i < groupNames.length; i++) {
+            this[groupNames[i]] = undefined;
+          }
+        }
+
+        if (hasIndices) {
+          // 5. Cache the indices object upon first access to avoid repeated allocations
+          // disable-next-line @typescript-eslint/no-explicit-any
+          let cachedIndices: any = undefined;
+          Object.defineProperty(this, 'indices', {
+            // @disable-next-line @typescript-eslint/no-explicit-any
+            get() {
+              if (raw === null) return undefined;
+              if (cachedIndices !== undefined) return cachedIndices;
+              
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const idx = (raw as any).indices;
+              if (!idx) return undefined;
+              
+              // Avoid object spread, use manual assignment based on precomputed names
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const result: any = { match: idx[0] };
+              if (idx.groups) {
+                for (let i = 0; i < groupNames.length; i++) {
+                  const gn = groupNames[i];
+                  if (idx.groups[gn] !== undefined) {
+                    result[gn] = idx.groups[gn];
+                  }
+                }
+              }
+              cachedIndices = result;
+              return cachedIndices;
+            },
+            enumerable: true
+          });
+        }
+      }
+
+      if (isGlobal) {
+        execFn = (str: string) => {
+          return (function* () {
+            const iterInstance = new RegExp(pattern, flags);
+            let match: RegExpExecArray | null;
+            while ((match = iterInstance.exec(str)) !== null) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              yield new (MatchResultClass as any)(match);
+              
+              // 4. Global zero-length match guard
+              if (match[0].length === 0) {
+                if (isUnicode && iterInstance.lastIndex < str.length) {
+                  iterInstance.lastIndex += str.codePointAt(iterInstance.lastIndex)! > 0xffff ? 2 : 1;
+                } else {
+                  iterInstance.lastIndex++;
+                }
+              }
+            }
+          })();
+        };
+      } else if (isSticky) {
+        execFn = (str: string) => {
+          internalNative.lastIndex = 0;
+          const match = internalNative.exec(str);
+          internalNative.lastIndex = 0;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return new (MatchResultClass as any)(match);
+        };
+      } else {
+        execFn = (str: string) => {
+          const match = internalNative.exec(str);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return new (MatchResultClass as any)(match);
+        };
+      }
     }
 
     return {
