@@ -1,7 +1,6 @@
 import { run, bench, group } from 'mitata';
 import { 
   simpleBuilder, mediumBuilder, complexBuilder, extremeBuilder,
-  simpleNative, mediumNative, complexNative, extremeNative
 } from './complexities';
 
 const scenarios = [

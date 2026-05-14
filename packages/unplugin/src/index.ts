@@ -1,0 +1,1 @@
+console.log('Hello from unplugin! This is a placeholder file. The actual implementation will be in the future.');

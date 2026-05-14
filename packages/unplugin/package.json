@@ -1,0 +1,25 @@
+{
+  "name": "@fajarnugraha37/ts-rex-plugin",
+  "version": "0.1.0",
+  "description": "Ahead-of-Time compilation plugin for TS-Rex",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "bunx tsup --watch",  
+    "build": "bun run lint && bunx tsc --noEmit && rm -rf dist && bunx tsc && bunx tsup",
+    "test": "bun test --isolate",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "unplugin": "^1.10.1",
+    "magic-string": "^0.30.10"
+  },
+  "peerDependencies": {
+    "@fajarnugraha37/ts-rex": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}
