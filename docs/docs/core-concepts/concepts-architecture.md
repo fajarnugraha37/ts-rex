@@ -147,7 +147,7 @@ private _buildPattern(nodes: ASTNode[]): string {
 }
 ```
 
-`compile()` then wraps the pattern in a `CompiledRegex` that contains the raw `pattern` string, the `native` `RegExp` instance, and an `exec` wrapper that creates a **fresh** `RegExp` on every call to avoid `lastIndex` state bugs caused by the `g` and `y` flags:
+`compile()` then wraps the pattern in a `CompiledRegex` that contains the raw `pattern` string, the `toRegExp()` factory method, and an `exec` wrapper that guarantees stateless execution to avoid `lastIndex` state bugs caused by the `g` and `y` flags (internally reusing a cached instance for single matches and cloning for iterators):
 
 ```typescript
 // src/core/builder.ts
@@ -155,20 +155,16 @@ compile(): CompiledRegex<TCaptures, TFlags> {
   const pattern = this._buildPattern(this.chunks);
   const flags = this._getFlagsString();
 
-  // One native regex for inspection purposes
-  const native = new RegExp(pattern, flags);
-
   const exec = (str: string): MatchResult<TCaptures, TFlags> => {
-    // Fresh instance on every call — guarantees statelessness
-    const instance = new RegExp(pattern, flags);
+    // Externally stateless â€” internally uses caching and cloning for safety
     // ...
   };
 
-  return { pattern, native, exec };
+  return { pattern, toRegExp: () => new RegExp(pattern, flags), exec };
 }
 ```
 
-The `native` property on `CompiledRegex` is provided for inspection (logging, tooling). Use `exec` for actual matching — it is the only stateless path.
+The `toRegExp()` factory method on `CompiledRegex` is provided if you need a raw native instance for external tooling. Use `exec` for actual matching â€” it is the only stateless path.
 
 ## How the pillars interact
 

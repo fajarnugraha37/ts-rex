@@ -57,7 +57,7 @@ TypeScript enforces this at compile time. If you call `.global()` the compiler w
 
 The classic pitfall with native `RegExp` and the `g` flag is `lastIndex`. A stateful regex object remembers where it stopped and resumes from that position on the next call. If you reuse the same `RegExp` instance across multiple `exec()` calls, you get confusing gaps and missed matches.
 
-TS-Rex eliminates this entirely. Every call to `exec()` creates a **fresh `RegExp` instance** internally. The `lastIndex` of the native pattern always starts at `0`, so calling `exec()` on the same compiled pattern multiple times on the same string always returns the same full set of matches.
+TS-Rex eliminates this entirely. The `.exec()` wrapper is externally stateless. Internally, single-match execution may reuse a private, cached `RegExp` instance with manual state resets for performance. For global matching, it uses an isolated `RegExp` instance per iterator. The `lastIndex` of the native pattern effectively always starts at `0` for your operations, so calling `exec()` on the same compiled pattern multiple times on the same string always returns the same full set of matches.
 
 ```typescript
 const pattern = rx()
@@ -99,7 +99,7 @@ console.log(m2?.[1]); // "42" (picks up where it left off)
 re.lastIndex = 0; // must remember to do this manually
 ```
 
-TS-Rex never exposes `lastIndex` to you. The compiled `pattern.native` property gives you access to the underlying `RegExp` for inspection, but all actual matching goes through the `exec()` wrapper which handles fresh instantiation internally.
+TS-Rex never exposes `lastIndex` to you. The compiled `pattern.toRegExp()` factory gives you access to a fresh underlying `RegExp` for inspection, but all actual matching goes through the `exec()` wrapper which handles isolated instances and caching internally.
 
 ## Combining .global() with .withIndices()
 
@@ -126,4 +126,4 @@ for (const result of results) {
 The `indices` property is typed as `Record<keyof TCaptures, [number, number]> & { match: [number, number] }`, so TypeScript knows exactly which group names are available as index keys.
 
 > [!TIP]
-> If you only need to check whether a string contains any match and do not need the captured values, you can use `compiled.native.test(str)` — the native `RegExp` instance is always available via `compiled.native`. For full type-safe iteration, `exec()` remains the recommended path.
+> If you only need to check whether a string contains any match and do not need the captured values, you can use `compiled.toRegExp().test(str)` — a fresh native `RegExp` instance is always available via `compiled.toRegExp()`. For full type-safe iteration, `exec()` remains the recommended path.

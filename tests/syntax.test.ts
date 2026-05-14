@@ -128,7 +128,7 @@ describe('Phase 2: Core Syntax, Boundaries & Escapes', () => {
         .whitespace()
         .digit()
         .compile()
-        .native;
+        .toRegExp();
       
       expect(reg.test('hello 5')).toBe(true);
       expect(reg.test('hello ')).toBe(false);

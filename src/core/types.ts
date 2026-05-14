@@ -133,12 +133,18 @@ export interface CompiledRegex<
 > {
   /** The generated raw regex pattern string. */
   pattern: string;
-  /** The native JavaScript RegExp instance. */
-  native: RegExp;
+  /** 
+   * A factory method that creates and returns a fresh native JavaScript RegExp instance.
+   * Exposing a factory instead of a mutable instance prevents state corruption (e.g. lastIndex)
+   * if the regex is passed to external libraries or used concurrently.
+   */
+  toRegExp: () => RegExp;
   /** 
    * Executes the regex against a string.
-   * This method is stateless; it creates a fresh RegExp instance for every call
-   * to avoid `lastIndex` side-effects.
+   * This method is externally stateless: repeated calls do not leak `lastIndex`
+   * state to the caller. Internally, single-match execution may reuse a private,
+   * cached RegExp instance for performance. Global iteration uses an isolated
+   * RegExp instance per iterator to avoid cross-iterator state corruption.
    * 
    * @param str - The input string to test.
    * @returns A {@link MatchResult} containing the match data or an iterator.

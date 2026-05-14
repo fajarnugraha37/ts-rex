@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: Introduction to TS-Rex
+title: Introduction
 description: Learn how to use TS-Rex, a type-safe regex builder for TypeScript that provides compile-time capture group inference and zero-dependency pattern construction.
 ---
 
@@ -21,7 +21,7 @@ Native JavaScript `RegExp` is powerful but fragile. Regex patterns are opaque st
 | Feature                   | Description                                                                                                                                  |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Static type inference** | Named captures are inferred directly from your builder chain at compile time. No type assertions, no `as string`, no surprises.              |
-| **Stateless execution**   | Every `.exec()` call creates a fresh `RegExp` instance, making global-flag iteration safe and free of `lastIndex` bugs.                      |
+| **Stateless execution**   | The `.exec()` wrapper is externally stateless, making global-flag iteration safe and free of `lastIndex` bugs while internally optimizing execution. |
 | **Automatic escaping**    | `.literal()` and `.anyOf()` auto-escape special characters. You cannot accidentally inject a malformed pattern through these methods.        |
 | **Immutable builder**     | Every method call returns a new `RegexBuilder` instance. You can safely branch a base pattern into multiple variations without side effects. |
 | **Deep optionality**      | Quantifiers like `.optional()` and `.zeroOrMore()` automatically mark inner capture types as `string \| undefined` in the result.            |
@@ -35,7 +35,7 @@ To use TS-Rex effectively, you work with four objects that form a pipeline from 
 - **`RegexBuilder`** is the immutable builder class. It exposes dozens of chainable, strictly-typed methods — `.literal()`, `.digit()`, `.capture()`, `.optional()`, `.or()`, and more. Each method appends an AST node internally and returns a new instance, carrying accumulated type state forward in its generic parameters.
 - **`CompiledRegex`** is the object returned by calling `.compile()` on a finished builder. It exposes:
   - `pattern` — the raw string representation of the compiled regex
-  - `native` — the native JavaScript `RegExp` instance for inspection and interop
+  - `toRegExp()` — a factory method that returns a fresh native JavaScript `RegExp` instance for inspection and interop
   - `exec(string)` — the type-safe extractor that returns a `MatchResult`
 - **`MatchResult`** is the discriminated union returned by `.exec()`. On failure it is `{ isMatch: false, match: null }`. On success it is `{ isMatch: true, match: string, ...yourCaptures }`. When the `.global()` flag is set, `.exec()` returns an `IterableIterator` of successful matches instead.
 

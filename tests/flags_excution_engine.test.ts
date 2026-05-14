@@ -5,7 +5,7 @@ import { rx } from '../src/index';
 describe('Phase 4: Flags & Execution Engine', () => {
   describe('Flags compilation', () => {
     test('should compile with no flags', () => {
-      const reg = rx().literal('a').compile().native;
+      const reg = rx().literal('a').compile().toRegExp();
       expect(reg.flags).toBe('');
     });
 
@@ -20,7 +20,7 @@ describe('Phase 4: Flags & Execution Engine', () => {
         .sticky()
         .withIndices()
         .compile()
-        .native;
+        .toRegExp();
       
       // Native RegExp sorts flags alphabetically
       expect(reg.flags).toBe('dgimsuy');
@@ -30,7 +30,7 @@ describe('Phase 4: Flags & Execution Engine', () => {
       // We can't actually test the native execution if the runtime doesn't support 'v'
       // but we can test that the builder outputs it correctly.
       const compiled = rx().literal('a').unicodeSets().compile();
-      expect(compiled.native.flags).toBe('v');
+      expect(compiled.toRegExp().flags).toBe('v');
     });
   });
 

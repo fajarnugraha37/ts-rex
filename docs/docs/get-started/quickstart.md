@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 title: Quickstart Guide
 description: Build your first type-safe regex pattern with TS-Rex. Learn how to install, build, compile, and execute regex in minutes.
 ---

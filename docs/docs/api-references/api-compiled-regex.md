@@ -15,18 +15,18 @@ Reference for `CompiledRegex` returned by `.compile()`: the `.exec()` method, `.
 ```typescript
 export interface CompiledRegex<TCaptures, TFlags> {
   pattern: string;
-  native: RegExp;
+  toRegExp: () => RegExp;
   exec: (str: string) => MatchResult<TCaptures, TFlags>;
 }
 ```
 
 - **pattern** (string): The raw regex pattern string without flag letters.
-- **native** (RegExp): The native JavaScript `RegExp` instance created at compile time.
-- **exec** (function): The primary execution method. Creates a fresh `RegExp` instance on every call to guarantee stateless execution.
+- **toRegExp** (function): A factory method that creates and returns a fresh native JavaScript `RegExp` instance.
+- **exec** (function): The primary execution method. Externally stateless, but internally may reuse a cached `RegExp` instance for performance.
 
 ## Stateless Execution Guarantee
 
-TS-Rex eliminates the `lastIndex` bug by instantiating a fresh `RegExp` on every call to `.exec()`. This means `.exec()` is a pure function: the same input always produces the same output.
+TS-Rex eliminates the `lastIndex` bug by ensuring `.exec()` is externally stateless. Internally, single-match execution may reuse a private, cached `RegExp` instance for performance, while explicitly resetting state where needed. Global iteration uses an isolated `RegExp` instance per iterator to avoid cross-iterator state corruption. This means `.exec()` acts as a pure function from the caller's perspective: the same input always produces the same output.
 
 ## `MatchResult` Types
 

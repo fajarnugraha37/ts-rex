@@ -42,8 +42,8 @@ describe('Logic & Syntax', () => {
       const b = rx().literal('foo').lookahead(rx().literal('bar'));
       const compiled = b.compile();
       expect(compiled.pattern).toBe('foo(?=bar)');
-      expect(compiled.native.test('foobar')).toBe(true);
-      expect(compiled.native.test('foobaz')).toBe(false);
+      expect(compiled.toRegExp().test('foobar')).toBe(true);
+      expect(compiled.toRegExp().test('foobaz')).toBe(false);
     });
 
     test('negativeLookahead (?!x)', () => {
@@ -51,8 +51,8 @@ describe('Logic & Syntax', () => {
       const b = rx().literal('foo').negativeLookahead(rx().literal('bar'));
       const compiled = b.compile();
       expect(compiled.pattern).toBe('foo(?!bar)');
-      expect(compiled.native.test('foobaz')).toBe(true);
-      expect(compiled.native.test('foobar')).toBe(false);
+      expect(compiled.toRegExp().test('foobaz')).toBe(true);
+      expect(compiled.toRegExp().test('foobar')).toBe(false);
     });
 
     test('lookbehind (?<=x)', () => {
@@ -60,8 +60,8 @@ describe('Logic & Syntax', () => {
       const b = rx().lookbehind(rx().literal('foo')).literal('bar');
       const compiled = b.compile();
       expect(compiled.pattern).toBe('(?<=foo)bar');
-      expect(compiled.native.test('foobar')).toBe(true);
-      expect(compiled.native.test('bazbar')).toBe(false);
+      expect(compiled.toRegExp().test('foobar')).toBe(true);
+      expect(compiled.toRegExp().test('bazbar')).toBe(false);
     });
 
     test('negativeLookbehind (?<!x)', () => {
@@ -69,8 +69,8 @@ describe('Logic & Syntax', () => {
       const b = rx().negativeLookbehind(rx().literal('foo')).literal('bar');
       const compiled = b.compile();
       expect(compiled.pattern).toBe('(?<!foo)bar');
-      expect(compiled.native.test('bazbar')).toBe(true);
-      expect(compiled.native.test('foobar')).toBe(false);
+      expect(compiled.toRegExp().test('bazbar')).toBe(true);
+      expect(compiled.toRegExp().test('foobar')).toBe(false);
     });
 
     test('lookaround nested capturing', () => {
